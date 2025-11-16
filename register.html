@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SupremeAmer Registration</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: linear-gradient(120deg, #4b0082 0%, #7c43bd 100%);
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .register-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px #0002;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 390px;
+      animation: fadeIn 0.8s;
+    }
+    .register-card h2 {
+      margin-top: 0;
+      color: #4b0082;
+      font-weight: bold;
+      letter-spacing: .02em;
+      margin-bottom: 1.8rem;
+      text-align: center;
+    }
+    .input-group {
+      margin-bottom: 1.3rem;
+    }
+    label {
+      display: block;
+      font-size: 1rem;
+      color: #444;
+      margin-bottom: .35em;
+      font-weight: 500;
+    }
+    input {
+      width: 100%;
+      padding: .8em 1em;
+      border: 1.5px solid #c7d2fe;
+      border-radius: 7px;
+      font-size: 1em;
+      background: #f8f8ff;
+      outline: none;
+      transition: border .2s;
+    }
+    input:focus {
+      border: 1.5px solid #7c43bd;
+    }
+    .register-btn {
+      width: 100%;
+      padding: .9em;
+      background: linear-gradient(90deg, #4b0082 0%, #7c43bd 100%);
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      font-size: 1.1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background .2s;
+      margin-top: .3em;
+      margin-bottom: 1.2em;
+    }
+    .register-btn:active {
+      background: #4b0082;
+    }
+    .msg {
+      text-align: center;
+      font-size: 1em;
+      margin-bottom: 1em;
+      min-height: 1.3em;
+    }
+    .msg.error { color: #e11d48; }
+    .msg.success { color: #16a34a; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(40px);} to{opacity:1;transform:translateY(0);} }
+    .note {
+      text-align: center;
+      font-size: .93em;
+      color: #666;
+    }
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 8px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="register-card">
+    <h2>Join SupremeAmer</h2>
+    <div id="msg" class="msg"></div>
+    <form id="registerForm" autocomplete="off">
+      <div class="input-group">
+        <label for="registerName">Full Name</label>
+        <input type="text" id="registerName" required maxlength="32" placeholder="Your name">
+      </div>
+      <div class="input-group">
+        <label for="registerEmail">Email Address</label>
+        <input type="email" id="registerEmail" required maxlength="64" placeholder="you@email.com">
+      </div>
+      <div class="input-group">
+        <label for="registerPassword">Password</label>
+        <input type="password" id="registerPassword" required minlength="6" maxlength="32" placeholder="At least 6 characters">
+      </div>
+      <button type="submit" class="register-btn" id="registerBtn">
+        <span>Register</span>
+      </button>
+    </form>
+    <div class="note">
+      Already have an account? <a href="login.html" style="color:#7c43bd;text-decoration:underline;">Login</a>
+    </div>
+  </div>
+
+  <script>
+    // Supabase setup
+    const supabaseUrl = 'https://kggfrpahzypghcyblkuo.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnZ2ZycGFoenlwZ2hjeWJsa3VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyOTkxMjYsImV4cCI6MjA3ODg3NTEyNn0.OAPQPjopykvnnadXokAm_0t3L6nwv8_jK-49ZqfGpzM';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    // DeviceID for anti-fraud (for demo: random, use fingerprintjs for production)
+    function getDeviceId() {
+      let id = localStorage.getItem('deviceId');
+      if (!id) {
+        id = 'dev-' + Math.random().toString(36).substr(2, 12);
+        localStorage.setItem('deviceId', id);
+      }
+      return id;
+    }
+
+    // Set button loading state
+    function setLoading(isLoading) {
+      const registerBtn = document.getElementById('registerBtn');
+      if (isLoading) {
+        registerBtn.disabled = true;
+        registerBtn.innerHTML = '<div class="loading"></div> Registering...';
+      } else {
+        registerBtn.disabled = false;
+        registerBtn.innerHTML = '<span>Register</span>';
+      }
+    }
+
+    document.getElementById('registerForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const msg = document.getElementById('msg');
+      msg.className = "msg";
+      msg.textContent = "";
+      
+      const name = document.getElementById('registerName').value.trim();
+      const email = document.getElementById('registerEmail').value.trim().toLowerCase();
+      const password = document.getElementById('registerPassword').value;
+      
+      if (!name || !email || !password) {
+        msg.textContent = "All fields are required.";
+        msg.classList.add('error');
+        return;
+      }
+
+      setLoading(true);
+      msg.textContent = "Registering...";
+
+      // Get IP address
+      let ip = "";
+      try {
+        ip = await fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>d.ip);
+      } catch { 
+        ip = "unknown"; 
+      }
+      
+      const deviceId = getDeviceId();
+
+      try {
+        // 1. Register in Supabase Auth
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: {
+              name: name,
+              registration_ip: ip,
+              device_id: deviceId
+            }
+          }
+        });
+
+        if (authError) throw authError;
+
+        // 2. Check if user profile was created automatically by trigger
+        if (authData.user) {
+          // Wait a moment for the trigger to create the profile
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Check if user profile exists
+          const { data: existingUser, error: checkError } = await supabase
+            .from('users')
+            .select('id')
+            .eq('id', authData.user.id)
+            .single();
+            
+          // If profile doesn't exist, create it manually
+          if (checkError || !existingUser) {
+            const { error: profileError } = await supabase
+              .from('users')
+              .insert({
+                id: authData.user.id,
+                email: email,
+                name: name,
+                registration_ip: ip,
+                device_id: deviceId,
+                status: "active",
+                welcome_bonus: false,
+                created_at: new Date().toISOString()
+              });
+              
+            if (profileError) {
+              console.error('Error creating user profile:', profileError);
+              // Continue anyway as the auth account was created
+            }
+          }
+        }
+
+        msg.textContent = "Registration successful! Please check your email to verify your account.";
+        msg.classList.add('success');
+        
+        // Redirect to login page after a delay
+        setTimeout(() => {
+          window.location.href = "login.html";
+        }, 3000);
+
+      } catch (error) {
+        console.error('Registration error:', error);
+        msg.textContent = error.message || "Registration failed. Please try again.";
+        msg.classList.add('error');
+      } finally {
+        setLoading(false);
+      }
+    };
+  </script>
+</body>
+</html>
