@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SupremeAmer - Authentication</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    :root {
+      --primary: #4b0082;
+      --primary-light: #7c43bd;
+      --secondary: #1a237e;
+      --accent: #16a34a;
+      --dark: #1e293b;
+      --light: #f8fafc;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #4b0082 0%, #7c43bd 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      width: 100%;
+      max-width: 460px;
+      transition: all 0.4s ease;
+      transform: translateY(0);
+      animation: cardEntrance 0.6s ease-out;
+    }
+    
+    @keyframes cardEntrance {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .card-header {
+      background: linear-gradient(to right, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      padding: 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .card-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: pulse 8s infinite linear;
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    
+    .logo {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .logo-icon {
+      background: white;
+      color: var(--primary);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .subtitle {
+      font-size: 14px;
+      opacity: 0.9;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .card-body {
+      padding: 28px;
+    }
+    
+    .form-toggle {
+      display: flex;
+      background: #f1f5f9;
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .toggle-btn {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: none;
+      background: transparent;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .toggle-btn.active {
+      color: var(--primary);
+    }
+    
+    .toggle-indicator {
+      position: absolute;
+      top: 4px;
+      height: calc(100% - 8px);
+      border-radius: 8px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      z-index: 1;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+      animation: fadeIn 0.4s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: var(--dark);
+      font-size: 14px;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(123, 67, 189, 0.2);
+    }
+    
+    .referral-group {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .referral-group .form-input {
+      flex: 1;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: all 0.6s ease;
+    }
+    
+    .btn:hover::before {
+      left: 100%;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(to right, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(123, 67, 189, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #f1f5f9;
+      color: var(--dark);
+    }
+    
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+    
+    .alert {
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: alertIn 0.4s ease-out;
+    }
+    
+    @keyframes alertIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .alert-error {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+    
+    .alert-success {
+      background: #f0fdf4;
+      color: #16a34a;
+      border: 1px solid #bbf7d0;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .referral-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1f5f9;
+      color: #475569;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+    
+    .loading {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .terms {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 20px 0;
+      font-size: 14px;
+      color: #64748b;
+    }
+    
+    .terms input {
+      margin-top: 3px;
+    }
+    
+    .terms a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .terms a:hover {
+      text-decoration: underline;
+    }
+    
+    .session-info {
+      background: #f1f5f9;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      animation: fadeIn 0.4s ease-out;
+    }
+    
+    .session-info button {
+      background: none;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 12px;
+      text-decoration: underline;
+    }
+    
+    .session-info button:hover {
+      color: var(--primary);
+    }
+    
+    @media (max-width: 480px) {
+      .card {
+        border-radius: 12px;
+      }
+      
+      .card-header {
+        padding: 24px;
+      }
+      
+      .card-body {
+        padding: 24px;
+      }
+      
+      .logo {
+        font-size: 28px;
+      }
+      
+      .logo-icon {
+        width: 42px;
+        height: 42px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="card-header">
+      <div class="logo">
+        <div class="logo-icon">
+          <i class="fas fa-crown"></i>
+        </div>
+        SupremeAmer
+      </div>
+      <div class="subtitle">Affiliate Network for Smart Earners & Advertisers</div>
+    </div>
+    
+    <div class="card-body">
+      <div class="form-toggle">
+        <div class="toggle-indicator" id="toggle-indicator"></div>
+        <button id="show-login" class="toggle-btn active">Login</button>
+        <button id="show-register" class="toggle-btn">Register</button>
+      </div>
+      
+      <div id="session-info" class="session-info hidden">
+        <div>
+          <i class="fas fa-user-check"></i>
+          <span>You're already logged in</span>
+        </div>
+        <button id="logout-session">Logout</button>
+      </div>
+      
+      <div id="error" class="alert alert-error hidden">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="error-message"></span>
+      </div>
+      
+      <div id="success" class="alert alert-success hidden">
+        <i class="fas fa-check-circle"></i>
+        <span id="success-message"></span>
+      </div>
+      
+      <form id="register-form" class="hidden">
+        <div class="form-group">
+          <label for="reg-username" class="form-label">Username</label>
+          <input type="text" id="reg-username" class="form-input" placeholder="Choose a username" required />
+        </div>
+        
+        <div class="form-group">
+          <label for="reg-email" class="form-label">Email</label>
+          <input type="email" id="reg-email" class="form-input" placeholder="Your email address" required />
+        </div>
+        
+        <div class="form-group">
+          <label for="reg-password" class="form-label">Password</label>
+          <input type="password" id="reg-password" class="form-input" placeholder="Create a strong password" required />
+        </div>
+        
+        <div class="form-group">
+          <label for="reg-referral" class="form-label">Referral Code (Optional)</label>
+          <div class="referral-group">
+            <input type="text" id="reg-referral" class="form-input" placeholder="Enter referral code" />
+            <button type="button" id="apply-referral" class="btn btn-secondary">Apply</button>
+          </div>
+          <div id="referral-notice" class="referral-badge hidden">
+            <i class="fas fa-gift"></i>
+            <span>You were invited by a friend!</span>
+          </div>
+        </div>
+        
+        <div class="terms">
+          <input type="checkbox" id="terms-agree" required />
+          <label for="terms-agree">
+            By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+          </label>
+        </div>
+        
+        <button type="submit" id="register-btn" class="btn btn-primary">
+          <span>Create Account</span>
+        </button>
+      </form>
+      
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-email" class="form-label">Email</label>
+          <input type="email" id="login-email" class="form-input" placeholder="Your email address" required />
+        </div>
+        
+        <div class="form-group">
+          <label for="login-password" class="form-label">Password</label>
+          <input type="password" id="login-password" class="form-input" placeholder="Your password" required />
+        </div>
+        
+        <button type="submit" id="login-btn" class="btn btn-primary">
+          <span>Sign In</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Supabase setup
+    const supabaseUrl = 'https://kggfrpahzypghcyblkuo.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnZ2ZycGFoenlwZ2hjeWJsa3VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyOTkxMjYsImV4cCI6MjA3ODg3NTEyNn0.OAPQPjopykvnnadXokAm_0t3L6nwv8_jK-49ZqfGpzM';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    // DOM Elements
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const showLoginBtn = document.getElementById('show-login');
+    const showRegisterBtn = document.getElementById('show-register');
+    const toggleIndicator = document.getElementById('toggle-indicator');
+    const errorDiv = document.getElementById('error');
+    const successDiv = document.getElementById('success');
+    const referralInput = document.getElementById('reg-referral');
+    const applyReferralBtn = document.getElementById('apply-referral');
+    const referralNotice = document.getElementById('referral-notice');
+    const registerBtn = document.getElementById('register-btn');
+    const loginBtn = document.getElementById('login-btn');
+    const sessionInfo = document.getElementById('session-info');
+    const logoutSessionBtn = document.getElementById('logout-session');
+    const termsAgree = document.getElementById('terms-agree');
+
+    // Initialize toggle indicator position
+    toggleIndicator.style.width = `${showLoginBtn.offsetWidth}px`;
+    toggleIndicator.style.left = `${showLoginBtn.offsetLeft}px`;
+
+    // Check for existing session
+    async function checkSession() {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        
+        if (session) {
+          const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('name')
+            .eq('id', session.user.id)
+            .single();
+            
+          if (!userError) {
+            sessionInfo.classList.remove('hidden');
+            showSuccess(`Welcome back, ${userData.name || session.user.email}!`);
+            
+            // Redirect to home after a brief delay
+            setTimeout(() => {
+              window.location.href = 'home.html';
+            }, 2000);
+            
+            return true;
+          }
+        }
+      } catch (error) {
+        console.log('No active session:', error);
+      }
+      
+      sessionInfo.classList.add('hidden');
+      return false;
+    }
+
+    // Toggle between Login/Register
+    function toggleForm(isLogin) {
+      if (isLogin) {
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+        showLoginBtn.classList.add('active');
+        showRegisterBtn.classList.remove('active');
+        toggleIndicator.style.left = `${showLoginBtn.offsetLeft}px`;
+      } else {
+        registerForm.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+        showRegisterBtn.classList.add('active');
+        showLoginBtn.classList.remove('active');
+        toggleIndicator.style.left = `${showRegisterBtn.offsetLeft}px`;
+      }
+      hideMessages();
+    }
+
+    showLoginBtn.onclick = () => toggleForm(true);
+    showRegisterBtn.onclick = () => toggleForm(false);
+
+    // Pre-fill referral from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const invitedBy = urlParams.get('invite');
+    if (invitedBy) {
+      referralInput.value = invitedBy;
+      referralNotice.classList.remove('hidden');
+    }
+
+    // Apply referral code manually
+    applyReferralBtn.onclick = () => {
+      if (referralInput.value.trim()) {
+        referralNotice.classList.remove('hidden');
+        showSuccess('Referral code applied successfully!');
+      } else {
+        referralNotice.classList.add('hidden');
+      }
+    };
+
+    // Show/hide messages
+    function showError(message) {
+      errorDiv.classList.remove('hidden');
+      document.getElementById('error-message').textContent = message;
+      successDiv.classList.add('hidden');
+    }
+
+    function showSuccess(message) {
+      successDiv.classList.remove('hidden');
+      document.getElementById('success-message').textContent = message;
+      errorDiv.classList.add('hidden');
+    }
+
+    function hideMessages() {
+      errorDiv.classList.add('hidden');
+      successDiv.classList.add('hidden');
+    }
+
+    // Set button loading state
+    function setLoading(button, isLoading) {
+      if (isLoading) {
+        button.disabled = true;
+        button.innerHTML = '<div class="loading"></div>';
+      } else {
+        button.disabled = false;
+        if (button.id === 'register-btn') {
+          button.innerHTML = '<span>Create Account</span>';
+        } else {
+          button.innerHTML = '<span>Sign In</span>';
+        }
+      }
+    }
+
+    // Find user by invite code
+    async function findUserByInviteCode(inviteCode) {
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('id')
+          .eq('invite_code', inviteCode)
+          .single();
+          
+        if (error) throw error;
+        return data;
+      } catch (error) {
+        console.error('Error finding user by invite code:', error);
+        return null;
+      }
+    }
+
+    // Registration
+    registerForm.onsubmit = async function(e) {
+      e.preventDefault();
+      
+      if (!termsAgree.checked) {
+        showError('You must accept the Terms of Service and Privacy Policy');
+        return;
+      }
+      
+      setLoading(registerBtn, true);
+      hideMessages();
+      
+      const username = document.getElementById('reg-username').value;
+      const email = document.getElementById('reg-email').value;
+      const password = document.getElementById('reg-password').value;
+      const referralCode = referralInput.value.trim();
+      
+      try {
+        // Validate password strength
+        if (password.length < 8) {
+          throw new Error('Password must be at least 8 characters long');
+        }
+        
+        // Find invited_by user if referral code provided
+        let invitedBy = null;
+        if (referralCode) {
+          const referrer = await findUserByInviteCode(referralCode);
+          if (referrer) {
+            invitedBy = referrer.id;
+          } else {
+            throw new Error('Invalid referral code');
+          }
+        }
+        
+        // 1. Create Supabase auth account
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: {
+              name: username,
+              invited_by: invitedBy
+            }
+          }
+        });
+        
+        if (authError) throw authError;
+        
+        // If user profile wasn't created automatically by trigger, create it manually
+        if (authData.user) {
+          // Check if user profile already exists
+          const { data: existingUser, error: checkError } = await supabase
+            .from('users')
+            .select('id')
+            .eq('id', authData.user.id)
+            .single();
+            
+          if (checkError || !existingUser) {
+            // Create user profile manually
+            const { error: profileError } = await supabase
+              .from('users')
+              .insert({
+                id: authData.user.id,
+                email: email,
+                name: username,
+                invited_by: invitedBy
+              });
+              
+            if (profileError) {
+              console.error('Error creating user profile:', profileError);
+            }
+          }
+        }
+        
+        showSuccess('Account created successfully! Please check your email to confirm your account.');
+        
+        // Clear form
+        registerForm.reset();
+        referralNotice.classList.add('hidden');
+        
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        setLoading(registerBtn, false);
+      }
+    };
+
+    // Login
+    loginForm.onsubmit = async function(e) {
+      e.preventDefault();
+      setLoading(loginBtn, true);
+      hideMessages();
+      
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+        
+        if (error) throw error;
+        
+        showSuccess('Login successful! Redirecting...');
+        
+        // Redirect to home after a brief delay
+        setTimeout(() => {
+          window.location.href = 'home.html';
+        }, 1000);
+        
+      } catch (error) {
+        showError(error.message);
+        setLoading(loginBtn, false);
+      }
+    };
+
+    // Logout from session
+    logoutSessionBtn.onclick = async function() {
+      try {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+        
+        sessionInfo.classList.add('hidden');
+        showSuccess('You have been logged out successfully.');
+      } catch (error) {
+        showError('Failed to logout: ' + error.message);
+      }
+    };
+
+    // Initialize page
+    async function init() {
+      // Check if user already has a session
+      const hasSession = await checkSession();
+      
+      // If no session, check for referral code in URL
+      if (!hasSession && invitedBy) {
+        toggleForm(false);
+      }
+    }
+
+    // Run initialization
+    init();
+  </script>
+</body>
+</html>
