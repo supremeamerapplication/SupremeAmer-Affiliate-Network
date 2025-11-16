@@ -78,9 +78,24 @@
       font-size: 1em;
       margin-bottom: 1em;
       min-height: 1.3em;
+      padding: 10px;
+      border-radius: 5px;
     }
-    .msg.error { color: #e11d48; }
-    .msg.success { color: #16a34a; }
+    .msg.error { 
+      color: #e11d48; 
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+    }
+    .msg.success { 
+      color: #16a34a; 
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+    }
+    .msg.info { 
+      color: #2563eb; 
+      background: #eff6ff;
+      border: 1px solid #dbeafe;
+    }
     @keyframes fadeIn { from{opacity:0;transform:translateY(40px);} to{opacity:1;transform:translateY(0);} }
     .note {
       text-align: center;
@@ -100,12 +115,47 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+    .email-confirmation {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    .email-confirmation h3 {
+      color: #4b0082;
+      margin-bottom: 10px;
+    }
+    .resend-btn {
+      background: #4b0082;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .resend-btn:hover {
+      background: #7c43bd;
+    }
   </style>
 </head>
 <body>
   <div class="register-card">
     <h2>Join SupremeAmer</h2>
     <div id="msg" class="msg"></div>
+    
+    <!-- Email Confirmation Section (hidden by default) -->
+    <div id="emailConfirmation" class="email-confirmation hidden">
+      <h3>📧 Check Your Email</h3>
+      <p>We've sent a confirmation link to <strong id="userEmail"></strong></p>
+      <p>Click the link in the email to verify your account and start earning!</p>
+      <button id="resendBtn" class="resend-btn">
+        <i class="fas fa-redo"></i> Resend Confirmation Email
+      </button>
+    </div>
+
     <form id="registerForm" autocomplete="off">
       <div class="input-group">
         <label for="registerName">Full Name</label>
@@ -120,7 +170,7 @@
         <input type="password" id="registerPassword" required minlength="6" maxlength="32" placeholder="At least 6 characters">
       </div>
       <button type="submit" class="register-btn" id="registerBtn">
-        <span>Register</span>
+        <span>Create Account</span>
       </button>
     </form>
     <div class="note">
@@ -134,7 +184,14 @@
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnZ2ZycGFoenlwZ2hjeWJsa3VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyOTkxMjYsImV4cCI6MjA3ODg3NTEyNn0.OAPQPjopykvnnadXokAm_0t3L6nwv8_jK-49ZqfGpzM';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-    // DeviceID for anti-fraud (for demo: random, use fingerprintjs for production)
+    // DOM Elements
+    const registerForm = document.getElementById('registerForm');
+    const emailConfirmation = document.getElementById('emailConfirmation');
+    const userEmailSpan = document.getElementById('userEmail');
+    const resendBtn = document.getElementById('resendBtn');
+    const msg = document.getElementById('msg');
+
+    // DeviceID for anti-fraud
     function getDeviceId() {
       let id = localStorage.getItem('deviceId');
       if (!id) {
@@ -149,44 +206,117 @@
       const registerBtn = document.getElementById('registerBtn');
       if (isLoading) {
         registerBtn.disabled = true;
-        registerBtn.innerHTML = '<div class="loading"></div> Registering...';
+        registerBtn.innerHTML = '<div class="loading"></div> Creating Account...';
       } else {
         registerBtn.disabled = false;
-        registerBtn.innerHTML = '<span>Register</span>';
+        registerBtn.innerHTML = '<span>Create Account</span>';
       }
     }
 
-    document.getElementById('registerForm').onsubmit = async function(e) {
+    // Show/hide messages
+    function showMessage(message, type = 'info') {
+      msg.textContent = message;
+      msg.className = `msg ${type}`;
+    }
+
+    // Generate simple invite code
+    function generateSimpleInviteCode(userId, userName) {
+      const namePart = userName.substring(0, 3).toUpperCase().padEnd(3, 'X');
+      const idPart = userId.substring(0, 5);
+      return namePart + idPart;
+    }
+
+    // Show email confirmation section
+    function showEmailConfirmation(email) {
+      registerForm.classList.add('hidden');
+      emailConfirmation.classList.remove('hidden');
+      userEmailSpan.textContent = email;
+    }
+
+    // Hide email confirmation section
+    function hideEmailConfirmation() {
+      emailConfirmation.classList.add('hidden');
+      registerForm.classList.remove('hidden');
+    }
+
+    // Resend confirmation email
+    resendBtn.onclick = async function() {
+      const email = document.getElementById('registerEmail').value.trim();
+      
+      setLoading(true);
+      showMessage('Sending confirmation email...', 'info');
+
+      try {
+        const { error } = await supabase.auth.resend({
+          type: 'signup',
+          email: email,
+        });
+
+        if (error) throw error;
+
+        showMessage('Confirmation email sent! Check your inbox.', 'success');
+        
+        // Disable resend button for 60 seconds to prevent spam
+        resendBtn.disabled = true;
+        let countdown = 60;
+        const originalText = resendBtn.innerHTML;
+        
+        const timer = setInterval(() => {
+          resendBtn.innerHTML = `Resend available in ${countdown}s`;
+          countdown--;
+          
+          if (countdown < 0) {
+            clearInterval(timer);
+            resendBtn.disabled = false;
+            resendBtn.innerHTML = originalText;
+          }
+        }, 1000);
+
+      } catch (error) {
+        console.error('Resend error:', error);
+        showMessage('Failed to resend email: ' + error.message, 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Registration form submission
+    registerForm.onsubmit = async function(e) {
       e.preventDefault();
-      const msg = document.getElementById('msg');
-      msg.className = "msg";
-      msg.textContent = "";
       
       const name = document.getElementById('registerName').value.trim();
       const email = document.getElementById('registerEmail').value.trim().toLowerCase();
       const password = document.getElementById('registerPassword').value;
       
       if (!name || !email || !password) {
-        msg.textContent = "All fields are required.";
-        msg.classList.add('error');
+        showMessage("All fields are required.", 'error');
+        return;
+      }
+
+      if (password.length < 6) {
+        showMessage("Password must be at least 6 characters long.", 'error');
         return;
       }
 
       setLoading(true);
-      msg.textContent = "Registering...";
-
-      // Get IP address
-      let ip = "";
-      try {
-        ip = await fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>d.ip);
-      } catch { 
-        ip = "unknown"; 
-      }
-      
-      const deviceId = getDeviceId();
+      showMessage("Creating your account...", 'info');
 
       try {
-        // 1. Register in Supabase Auth
+        // Get IP address
+        let ip = "unknown";
+        try {
+          const ipResponse = await fetch('https://api.ipify.org?format=json');
+          if (ipResponse.ok) {
+            const ipData = await ipResponse.json();
+            ip = ipData.ip;
+          }
+        } catch (error) {
+          console.log('Could not fetch IP:', error);
+        }
+        
+        const deviceId = getDeviceId();
+
+        // 1. Register in Supabase Auth (this will send confirmation email automatically)
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: email,
           password: password,
@@ -195,62 +325,83 @@
               name: name,
               registration_ip: ip,
               device_id: deviceId
-            }
+            },
+            // This ensures email confirmation is sent
+            emailRedirectTo: `${window.location.origin}/login.html`
           }
         });
 
-        if (authError) throw authError;
-
-        // 2. Check if user profile was created automatically by trigger
-        if (authData.user) {
-          // Wait a moment for the trigger to create the profile
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          // Check if user profile exists
-          const { data: existingUser, error: checkError } = await supabase
-            .from('users')
-            .select('id')
-            .eq('id', authData.user.id)
-            .single();
-            
-          // If profile doesn't exist, create it manually
-          if (checkError || !existingUser) {
-            const { error: profileError } = await supabase
-              .from('users')
-              .insert({
-                id: authData.user.id,
-                email: email,
-                name: name,
-                registration_ip: ip,
-                device_id: deviceId,
-                status: "active",
-                welcome_bonus: false,
-                created_at: new Date().toISOString()
-              });
-              
-            if (profileError) {
-              console.error('Error creating user profile:', profileError);
-              // Continue anyway as the auth account was created
-            }
+        if (authError) {
+          // Handle specific Supabase errors
+          if (authError.message.includes('already registered')) {
+            throw new Error('This email is already registered. Please login instead.');
+          } else if (authError.message.includes('password')) {
+            throw new Error('Password does not meet requirements.');
+          } else {
+            throw new Error(authError.message);
           }
         }
 
-        msg.textContent = "Registration successful! Please check your email to verify your account.";
-        msg.classList.add('success');
+        if (!authData.user) {
+          throw new Error('Registration failed. Please try again.');
+        }
+
+        // 2. Create user profile manually
+        const inviteCode = generateSimpleInviteCode(authData.user.id, name);
         
-        // Redirect to login page after a delay
-        setTimeout(() => {
-          window.location.href = "login.html";
-        }, 3000);
+        const { error: profileError } = await supabase
+          .from('users')
+          .insert({
+            id: authData.user.id,
+            email: email,
+            name: name,
+            invite_code: inviteCode,
+            registration_ip: ip,
+            device_id: deviceId,
+            status: "pending", // Set to pending until email confirmation
+            welcome_bonus: false,
+            created_at: new Date().toISOString()
+          });
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+          
+          // If profile creation fails, check if it's because user already exists
+          if (profileError.code === '23505') { // Unique violation
+            // User profile might already exist from trigger, continue
+            console.log('User profile might already exist, continuing...');
+          } else {
+            throw new Error('Failed to create user profile: ' + profileError.message);
+          }
+        }
+
+        // Show email confirmation section
+        showEmailConfirmation(email);
+        showMessage('Account created! Please check your email to verify your account.', 'success');
 
       } catch (error) {
         console.error('Registration error:', error);
-        msg.textContent = error.message || "Registration failed. Please try again.";
-        msg.classList.add('error');
+        showMessage(error.message || "Registration failed. Please try again.", 'error');
       } finally {
         setLoading(false);
       }
     };
+
+    // Add real-time validation
+    document.getElementById('registerPassword').addEventListener('input', function() {
+      const password = this.value;
+      
+      if (password.length > 0 && password.length < 6) {
+        showMessage("Password must be at least 6 characters", 'error');
+      } else {
+        showMessage("", 'info');
+      }
+    });
+
+    // Check if user is trying to register again (back button)
+    window.addEventListener('pageshow', function() {
+      hideEmailConfirmation();
+    });
   </script>
 </body>
 </html>
