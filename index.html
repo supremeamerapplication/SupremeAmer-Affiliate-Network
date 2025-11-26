@@ -6,7 +6,7 @@
   <title>SupremeAmer Affiliate Network</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
+  <script src="https://js.paystack.co/v1/inline.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <link href="https://fonts.googleapis.com/css?family=Inter:400,500,600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -19,11 +19,11 @@
       --profile-gradient: linear-gradient(135deg, #0d1333 0%, #1a237e 40%, #000 100%);
       --transition: all 0.2s ease;
     }
-    
+
     * {
       box-sizing: border-box;
     }
-    
+
     html, body {
       min-height: 100%;
       font-family: 'Inter', Arial, sans-serif;
@@ -32,12 +32,12 @@
       padding: 0;
       scroll-behavior: smooth;
     }
-    
+
     body {
       background: linear-gradient(to bottom, #e0e7ff 0%, #fff 100%);
       padding-bottom: 80px;
     }
-    
+
     /* Improved header styling */
     header {
       display: flex;
@@ -51,13 +51,13 @@
       top: 0;
       z-index: 1000;
     }
-    
+
     .logo-container {
       display: flex;
       align-items: center;
       gap: 0.75rem;
     }
-    
+
     .logo {
       width: 48px;
       height: 48px;
@@ -66,25 +66,25 @@
       background: #fff;
       box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
-    
+
     .app-name {
       font-size: 1.5rem;
       font-weight: 700;
       letter-spacing: -0.025em;
     }
-    
+
     .app-tagline {
       font-size: 0.75rem;
       opacity: 0.9;
       font-weight: 400;
     }
-    
+
     .user-info {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
     }
-    
+
     /* Enhanced tab styling */
     .tab-btn {
       background: none;
@@ -101,32 +101,32 @@
       align-items: center;
       gap: 0.25rem;
     }
-    
+
     .tab-btn i {
       font-size: 1.25rem;
     }
-    
+
     .tab-btn.active, .tab-btn:focus {
       background: linear-gradient(90deg, var(--indigo) 60%, var(--purple) 100%);
       color: #fff;
       outline: none;
       box-shadow: 0 4px 12px rgba(123, 67, 189, 0.3);
     }
-    
+
     .tab-content { 
       display: none; 
     }
-    
+
     .tab-content.active { 
       display: block; 
       animation: fadeIn 0.4s; 
     }
-    
+
     @keyframes fadeIn { 
       from { opacity: 0; transform: translateY(10px); } 
       to { opacity: 1; transform: translateY(0); } 
     }
-    
+
     /* Left Navigation Bar */
     .left-nav {
       position: fixed;
@@ -143,11 +143,11 @@
       box-shadow: 2px 0 10px rgba(0,0,0,0.1);
       overflow-y: auto;
     }
-    
+
     .left-nav.open {
       transform: translateX(0);
     }
-    
+
     .left-nav-overlay {
       position: fixed;
       top: 0;
@@ -158,11 +158,11 @@
       z-index: 1999;
       display: none;
     }
-    
+
     .left-nav-overlay.open {
       display: block;
     }
-    
+
     .left-nav-header {
       display: flex;
       align-items: center;
@@ -171,25 +171,25 @@
       padding-bottom: 1rem;
       border-bottom: 1px solid rgba(255,255,255,0.2);
     }
-    
+
     .left-nav-logo {
       width: 40px;
       height: 40px;
       border-radius: 50%;
       background: white;
     }
-    
+
     .left-nav-title {
       font-size: 1.25rem;
       font-weight: 700;
     }
-    
+
     .left-nav-menu {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
     }
-    
+
     .left-nav-item {
       display: flex;
       align-items: center;
@@ -200,22 +200,22 @@
       cursor: pointer;
       color: rgba(255,255,255,0.9);
     }
-    
+
     .left-nav-item:hover {
       background: rgba(255,255,255,0.1);
       color: white;
     }
-    
+
     .left-nav-item.active {
       background: rgba(255,255,255,0.2);
       color: white;
     }
-    
+
     .left-nav-item i {
       width: 20px;
       text-align: center;
     }
-    
+
     /* Enhanced modal styling */
     .modal-bg {
       display: none; 
@@ -231,12 +231,12 @@
       justify-content: center;
       padding: 1rem;
     }
-    
+
     .modal-bg.open { 
       display: flex; 
       animation: fadeIn 0.3s;
     }
-    
+
     .modal {
       background: #fff;
       border-radius: 20px;
@@ -250,7 +250,7 @@
       max-height: 90vh;
       overflow-y: auto;
     }
-    
+
     .modal-header {
       display: flex;
       justify-content: space-between;
@@ -259,13 +259,13 @@
       padding-bottom: 0.75rem;
       border-bottom: 1px solid #e5e7eb;
     }
-    
+
     .modal-title {
       font-size: 1.25rem;
       font-weight: 700;
       color: #1a237e;
     }
-    
+
     .modal-close {
       background: #f3f4f6;
       border: none;
@@ -278,11 +278,11 @@
       cursor: pointer;
       transition: var(--transition);
     }
-    
+
     .modal-close:hover {
       background: #e5e7eb;
     }
-    
+
     /* Footer navigation improvements */
     .footer-nav {
       position: fixed; 
@@ -298,7 +298,7 @@
       padding: 0.75rem 0;
       backdrop-filter: blur(10px);
     }
-    
+
     /* Welcome card improvements */
     .welcome-card {
       animation: bounceIn 0.9s;
@@ -310,19 +310,19 @@
       position: relative;
       border: 1px solid rgba(123, 67, 189, 0.1);
     }
-    
+
     @keyframes bounceIn {
       0% { transform: scale(0.7); opacity: 0; }
       80% { transform: scale(1.05); }
       100% { transform: scale(1); opacity: 1; }
     }
-    
+
     .welcome-icon {
       font-size: 3rem;
       color: #7c43bd;
       margin-bottom: 1rem;
     }
-    
+
     /* Button improvements */
     .btn {
       display: inline-flex;
@@ -337,46 +337,46 @@
       transition: var(--transition);
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-    
+
     .btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     }
-    
+
     .btn:active {
       transform: translateY(0);
     }
-    
+
     .btn-primary {
       background: linear-gradient(90deg, var(--indigo) 0%, var(--purple) 100%);
       color: white;
     }
-    
+
     .btn-secondary {
       background: #f3f4f6;
       color: #4b5563;
     }
-    
+
     .btn-success {
       background: #16a34a;
       color: white;
     }
-    
+
     .btn-danger {
       background: #dc2626;
       color: white;
     }
-    
+
     .btn-warning {
       background: #ea580c;
       color: white;
     }
-    
+
     .btn-sm {
       padding: 0.5rem 1rem;
       font-size: 0.875rem;
     }
-    
+
     /* Card improvements */
     .card {
       background: #fff;
@@ -386,12 +386,12 @@
       border: 1px solid rgba(0, 0, 0, 0.05);
       transition: var(--transition);
     }
-    
+
     .card:hover {
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
       transform: translateY(-2px);
     }
-    
+
     /* Dashboard improvements */
     .balance-card {
       background: linear-gradient(135deg, #1a237e 0%, #7c43bd 100%);
@@ -401,25 +401,25 @@
       margin-bottom: 1.5rem;
       box-shadow: 0 10px 30px rgba(123, 67, 189, 0.3);
     }
-    
+
     .balance-label {
       font-size: 0.875rem;
       opacity: 0.9;
       margin-bottom: 0.5rem;
     }
-    
+
     .balance-amount {
       font-size: 2.5rem;
       font-weight: 700;
       margin-bottom: 1.5rem;
     }
-    
+
     .action-buttons {
       display: flex;
       gap: 0.75rem;
       flex-wrap: wrap;
     }
-    
+
     /* Marketplace improvements */
     .ad-card {
       border: 1px solid #e5e7eb;
@@ -429,12 +429,12 @@
       transition: var(--transition);
       background: #fff;
     }
-    
+
     .ad-card:hover {
       border-color: #7c43bd;
       box-shadow: 0 4px 20px rgba(123, 67, 189, 0.1);
     }
-    
+
     .ad-image {
       width: 100%;
       border-radius: 12px;
@@ -442,14 +442,14 @@
       height: 160px;
       object-fit: cover;
     }
-    
+
     .ad-title {
       font-size: 1.125rem;
       font-weight: 600;
       margin-bottom: 0.5rem;
       color: #1a237e;
     }
-    
+
     .ad-meta {
       display: flex;
       gap: 1rem;
@@ -457,25 +457,25 @@
       font-size: 0.875rem;
       color: #6b7280;
     }
-    
+
     .ad-meta span {
       display: flex;
       align-items: center;
       gap: 0.25rem;
     }
-    
+
     /* Form improvements */
     .form-group {
       margin-bottom: 1.25rem;
     }
-    
+
     .form-label {
       display: block;
       margin-bottom: 0.5rem;
       font-weight: 500;
       color: #374151;
     }
-    
+
     .form-input {
       width: 100%;
       padding: 0.75rem 1rem;
@@ -484,13 +484,13 @@
       transition: var(--transition);
       font-size: 1rem;
     }
-    
+
     .form-input:focus {
       outline: none;
       border-color: #7c43bd;
       box-shadow: 0 0 0 3px rgba(123, 67, 189, 0.2);
     }
-    
+
     /* Loading state */
     .loading {
       display: inline-block;
@@ -501,11 +501,11 @@
       border-top-color: #7c43bd;
       animation: spin 1s ease-in-out infinite;
     }
-    
+
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-    
+
     /* Notification improvements */
     .notification {
       position: fixed;
@@ -524,68 +524,68 @@
       opacity: 0;
       transition: all 0.3s ease;
     }
-    
+
     .notification.show {
       transform: translateX(0);
       opacity: 1;
     }
-    
+
     .notification-success {
       background: #16a34a;
     }
-    
+
     .notification-error {
       background: #dc2626;
     }
-    
+
     .notification-warning {
       background: #ea580c;
     }
-    
+
     .notification-info {
       background: #2563eb;
     }
-    
+
     /* New Animations */
     @keyframes pulse {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.05); }
     }
-    
+
     @keyframes slideInUp {
       from { transform: translateY(30px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
-    
+
     @keyframes bounce {
       0%, 20%, 53%, 80%, 100% { transform: translate3d(0,0,0); }
       40%, 43% { transform: translate3d(0,-10px,0); }
       70% { transform: translate3d(0,-5px,0); }
       90% { transform: translate3d(0,-2px,0); }
     }
-    
+
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
       10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
       20%, 40%, 60%, 80% { transform: translateX(5px); }
     }
-    
+
     .pulse-animation {
       animation: pulse 2s infinite;
     }
-    
+
     .slide-in-up {
       animation: slideInUp 0.5s ease-out;
     }
-    
+
     .bounce-animation {
       animation: bounce 1s;
     }
-    
+
     .shake-animation {
       animation: shake 0.5s;
     }
-    
+
     /* Daily Reward Card */
     .daily-reward-card {
       background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
@@ -597,7 +597,7 @@
       position: relative;
       overflow: hidden;
     }
-    
+
     .daily-reward-card::before {
       content: '';
       position: absolute;
@@ -609,97 +609,146 @@
       transform: rotate(45deg);
       animation: shine 3s infinite;
     }
-    
+
     @keyframes shine {
       0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
       100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
     }
-    
+
     /* Responsive improvements */
     @media (max-width: 768px) {
       header {
         padding: 0.75rem 1rem;
       }
-      
+
       .app-name {
         font-size: 1.25rem;
       }
-      
+
       .user-email {
         max-width: 120px;
       }
-      
+
       .modal {
         padding: 1.5rem;
         border-radius: 16px;
       }
-      
+
       .balance-amount {
         font-size: 2rem;
       }
-      
+
       .action-buttons {
         flex-direction: column;
       }
-      
+
       .action-buttons .btn {
         width: 100%;
       }
-      
+
       .footer-nav {
         padding: 0.5rem 0;
       }
-      
+
       .tab-btn {
         padding: 0.5rem;
         font-size: 0.75rem;
       }
-      
+
       .tab-btn i {
         font-size: 1.125rem;
       }
     }
-    
+
     @media (max-width: 480px) {
       .logo {
         width: 40px;
         height: 40px;
       }
-      
+
       .app-name {
         font-size: 1.125rem;
       }
-      
+
       .user-info {
         display: none;
       }
-      
+
       .mobile-user-menu {
         display: block !important;
       }
     }
-    
+
     /* Additional utility classes */
     .text-truncate {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    
+
     .mobile-user-menu {
       display: none;
     }
-    
+
     .skeleton {
       background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
       background-size: 200% 100%;
       animation: loading 1.5s infinite;
       border-radius: 4px;
     }
-    
+
     @keyframes loading {
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
+    }
+
+    /* New styles for Paystack integration */
+    .paystack-btn {
+      background: #00A859;
+      color: white;
+    }
+    
+    .paystack-btn:hover {
+      background: #008F4C;
+    }
+    
+    .balance-breakdown {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 1rem;
+      border: 1px solid #bae6fd;
+    }
+    
+    .balance-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #e1f5fe;
+    }
+    
+    .balance-item:last-child {
+      border-bottom: none;
+    }
+    
+    .balance-type {
+      font-weight: 500;
+    }
+    
+    .balance-amount {
+      font-weight: 600;
+    }
+    
+    .topup-balance {
+      color: #7c43bd;
+    }
+    
+    .earnings-balance {
+      color: #16a34a;
+    }
+    
+    .withdrawable-balance {
+      color: #1a237e;
     }
   </style>
 </head>
@@ -711,7 +760,7 @@
       <div class="left-nav-logo"></div>
       <div class="left-nav-title">SupremeAmer</div>
     </div>
-    
+
     <div class="left-nav-menu">
       <div class="left-nav-item active" data-tab="homeTab">
         <i class="fas fa-home"></i>
@@ -743,7 +792,7 @@
       </div>
     </div>
   </div>
-  
+
   <div class="left-nav-overlay" id="leftNavOverlay"></div>
 
   <!-- HEADER -->
@@ -758,7 +807,7 @@
         <div class="app-tagline">Affiliate Network for Smart Earners & Advertisers</div>
       </div>
     </div>
-    
+
     <div class="user-info">
       <span id="user-email" class="text-xs opacity-80 truncate max-w-xs user-email"></span>
       <span id="user-username" class="text-lg font-semibold"></span>
@@ -771,7 +820,7 @@
         </button>
       </div>
     </div>
-    
+
     <div class="mobile-user-menu">
       <button id="mobileMenuBtn" class="btn btn-secondary">
         <i class="fas fa-bars"></i>
@@ -788,7 +837,7 @@
           <i class="fas fa-times"></i>
         </button>
       </div>
-      
+
       <div class="mb-4">
         <div class="flex justify-between items-center mb-3">
           <span class="font-medium">ID:</span>
@@ -802,7 +851,7 @@
           <span class="font-medium">Email:</span>
           <span id="user-email-modal" class="truncate max-w-[200px]"></span>
         </div>
-        
+
         <div class="mt-4">
           <h4 class="font-semibold mb-2">Your Invitation Link</h4>
           <div class="flex items-center gap-2">
@@ -811,19 +860,19 @@
               <i class="fas fa-copy"></i>
             </button>
           </div>
-          
+
           <div class="mt-3 flex gap-2">
             <button id="showQrBtn" class="btn btn-primary">
               <i class="fas fa-qrcode"></i> QR Code
             </button>
           </div>
-          
+
           <div id="inviteQrWrap" class="mt-4 hidden flex justify-center">
             <canvas id="inviteQr" width="160" height="160"></canvas>
           </div>
         </div>
       </div>
-      
+
       <div class="flex justify-end">
         <button class="btn btn-primary close-modal" aria-label="Close Profile Modal">Close</button>
       </div>
@@ -859,7 +908,7 @@
           <i class="fas fa-times"></i>
         </button>
       </div>
-      
+
       <div class="mb-4">
         <label class="form-label">Select Screenshot Image</label>
         <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
@@ -872,7 +921,7 @@
           <div id="fileName" class="text-xs text-gray-500 mt-2"></div>
         </div>
       </div>
-      
+
       <div class="flex gap-2 justify-center">
         <button id="submitProofBtn" class="btn btn-success">
           <i class="fas fa-check-circle mr-2"></i> Submit Proof
@@ -902,13 +951,30 @@
           </button>
         </div>
       </div>
-      
+
       <div class="balance-card">
         <div class="balance-label">Account Balance</div>
         <div class="balance-amount" id="account-balance">$SA 0</div>
+        
+        <!-- Balance Breakdown -->
+        <div class="balance-breakdown">
+          <div class="balance-item">
+            <span class="balance-type topup-balance">Top-up Balance:</span>
+            <span class="balance-amount topup-balance" id="topup-balance">$SA 0</span>
+          </div>
+          <div class="balance-item">
+            <span class="balance-type earnings-balance">Earnings Balance:</span>
+            <span class="balance-amount earnings-balance" id="earnings-balance">$SA 0</span>
+          </div>
+          <div class="balance-item">
+            <span class="balance-type withdrawable-balance">Withdrawable Balance:</span>
+            <span class="balance-amount withdrawable-balance" id="withdrawable-balance">$SA 0</span>
+          </div>
+        </div>
+        
         <div class="action-buttons">
           <button class="btn btn-primary" id="fundBtn">
-            <i class="fas fa-plus-circle mr-2"></i> Fund
+            <i class="fas fa-plus-circle mr-2"></i> Top Up
           </button>
           <button class="btn btn-success" id="cashoutBtn">
             <i class="fas fa-wallet mr-2"></i> Withdraw
@@ -918,7 +984,7 @@
           </button>
         </div>
       </div>
-      
+
       <div class="card">
         <h2 class="text-xl font-bold mb-4 text-indigo-900">Dashboard Overview</h2>
         <div id="dashboard-content">
@@ -942,7 +1008,7 @@
     <section id="marketTab" class="tab-content" aria-labelledby="market-tab-btn">
       <div class="card mb-4">
         <h2 class="text-xl font-bold mb-4 text-indigo-900">Marketplace</h2>
-        
+
         <div class="flex flex-col md:flex-row md:items-center gap-3 mb-4">
           <div class="form-group flex-1">
             <input id="marketSearch" type="text" placeholder="Search by keyword or category..." class="form-input" />
@@ -955,9 +1021,9 @@
             </select>
           </div>
         </div>
-        
+
         <div id="market-list" class="mb-5"></div>
-        
+
         <button id="uploadAdvertBtn" class="btn btn-primary w-full">
           <i class="fas fa-plus-circle mr-2"></i> Upload Advert
         </button>
@@ -973,13 +1039,13 @@
             <i class="fas fa-times"></i>
           </button>
         </div>
-        
+
         <form id="uploadAdvertForm" class="flex flex-col gap-4">
           <div class="form-group">
             <label class="form-label">Advert Title</label>
             <input type="text" id="ad-title" class="form-input" placeholder="Advert Title (max 60 chars)" required maxlength="60" autocomplete="off" />
           </div>
-          
+
           <div class="form-group">
             <label class="form-label">Category</label>
             <select id="ad-category" class="form-input" required>
@@ -991,40 +1057,40 @@
               <option value="Others">Others</option>
             </select>
           </div>
-          
+
           <div class="form-group">
             <label class="form-label">Clicks Required</label>
             <input type="number" id="ad-clicks" class="form-input" min="50" max="10000" placeholder="Clicks (min 50, max 10000)" required />
           </div>
-          
+
           <div class="form-group">
             <label class="form-label">Advert URL</label>
             <input type="url" id="ad-url" class="form-input" placeholder="https://example.com" required autocomplete="off" />
           </div>
-          
+
           <div class="form-group">
             <label class="form-label">Advert Image (Optional)</label>
             <input type="file" id="ad-image" accept="image/*" class="form-input" />
           </div>
-          
+
           <div class="form-group">
             <label class="form-label">Participation Instructions</label>
             <textarea id="ad-instructions" class="form-input" rows="3" placeholder="What should users do? (e.g., post a comment, like, etc.)" required></textarea>
           </div>
-          
+
           <div id="ad-cost" class="text-sm text-indigo-700 my-2 p-3 bg-indigo-50 rounded-lg"></div>
-          
+
           <div id="ad-preview" class="my-2 hidden">
             <span class="font-bold">Preview:</span>
             <div id="ad-preview-content" class="border p-3 rounded-lg bg-gray-50 mt-2"></div>
           </div>
-          
+
           <div class="flex gap-2">
             <button type="button" id="previewAdBtn" class="btn btn-secondary flex-1">
               <i class="fas fa-eye mr-2"></i> Preview
             </button>
-            <button type="submit" class="btn btn-primary flex-1">
-              <i class="fas fa-upload mr-2"></i> Submit Advert
+            <button type="button" id="payForAdBtn" class="btn paystack-btn flex-1">
+              <i class="fas fa-credit-card mr-2"></i> Pay with Paystack
             </button>
           </div>
         </form>
@@ -1036,7 +1102,7 @@
       <div class="card mb-4">
         <h2 class="text-xl font-bold mb-4 text-indigo-900">Invite Friends</h2>
         <p class="mb-4 text-gray-600">Share your unique invitation link to earn rewards!</p>
-        
+
         <div class="form-group">
           <label class="form-label">Your Invitation Link</label>
           <div class="flex items-center gap-2">
@@ -1046,7 +1112,7 @@
             </button>
           </div>
         </div>
-        
+
         <div class="flex gap-2 mb-4 flex-wrap">
           <button id="inviteQrBtn" class="btn btn-primary">
             <i class="fas fa-qrcode mr-2"></i> QR Code
@@ -1055,11 +1121,11 @@
             <i class="fas fa-share-alt mr-2"></i> Share
           </button>
         </div>
-        
+
         <div id="inviteQrContainer" class="mb-4 hidden flex justify-center">
           <canvas id="inviteQrImg" width="160" height="160"></canvas>
         </div>
-        
+
         <div id="inviteShareBtns" class="grid grid-cols-2 gap-2 mb-4 hidden">
           <a id="whatsappShare" class="btn btn-success" target="_blank">
             <i class="fab fa-whatsapp mr-2"></i> WhatsApp
@@ -1075,17 +1141,17 @@
           </a>
         </div>
       </div>
-      
+
       <div class="card mb-4">
         <h3 class="font-semibold mb-3 text-indigo-800">Your Invited Friends</h3>
         <div id="invitee-list" class="text-gray-500">No friends invited yet.</div>
       </div>
-      
+
       <div class="card mb-4">
         <h3 class="font-semibold mb-3 text-indigo-800">Referral Leaderboard</h3>
         <div id="referral-leaderboard" class="text-gray-500">Loading leaderboard...</div>
       </div>
-      
+
       <div class="card">
         <h3 class="font-semibold mb-3 text-indigo-800">Your Referral Stats</h3>
         <div id="referral-analytics">
@@ -1105,7 +1171,7 @@
     <section id="walletTab" class="tab-content" aria-labelledby="wallet-tab-btn">
       <div class="card">
         <h2 class="text-xl font-bold mb-4 text-indigo-900">Wallet</h2>
-        
+
         <div class="mb-4 p-3 bg-gray-50 rounded-lg">
           <div class="flex justify-between items-center mb-2">
             <span id="walletStatus" class="font-semibold">Not Connected</span>
@@ -1113,26 +1179,26 @@
               <i class="fas fa-unlink mr-1"></i> Disconnect
             </button>
           </div>
-          
+
           <button id="connectWalletBtn" class="btn btn-primary w-full">
             <i class="fas fa-wallet mr-2"></i> Connect Wallet
           </button>
         </div>
-        
+
         <div id="wallet-details" class="hidden p-4 border border-indigo-200 rounded-lg bg-indigo-50 text-indigo-900">
           <div class="grid grid-cols-2 gap-3">
             <div class="font-medium">Provider:</div>
             <div id="wallet-provider"></div>
-            
+
             <div class="font-medium">Wallet Address:</div>
             <div id="wallet-address" class="truncate"></div>
-            
+
             <div class="font-medium">BNB Balance:</div>
             <div id="eth-balance"></div>
-            
+
             <div class="font-medium">$SA Balance:</div>
             <div id="sa-balance"></div>
-            
+
             <div class="font-medium">Network:</div>
             <div id="wallet-network"></div>
           </div>
@@ -1175,7 +1241,7 @@
           <i class="fas fa-times"></i>
         </button>
       </div>
-      
+
       <div id="payment-history-content" class="max-h-60 overflow-y-auto">
         <div class="text-center text-gray-500 py-4">No transactions yet.</div>
       </div>
@@ -1191,21 +1257,21 @@
           <i class="fas fa-times"></i>
         </button>
       </div>
-      
+
       <div class="mb-4">
         <div class="flex items-center gap-2 mb-3">
           <i class="fas fa-envelope text-indigo-600"></i>
           <span>Email: <a href="mailto:support@supremeamer.com" class="text-blue-600 underline">support@supremeamer.com</a></span>
         </div>
-        
+
         <div class="bg-gray-50 p-3 rounded-lg">
           <div class="font-medium mb-2">AI Quick Response:</div>
           <p class="text-sm text-gray-700">"How can we help? Describe your issue and our AI will provide a quick answer or escalate to a human!"</p>
-          
+
           <div class="form-group mt-3">
             <textarea class="form-input" rows="3" placeholder="Describe your issue here..."></textarea>
           </div>
-          
+
           <button class="btn btn-primary w-full">
             <i class="fas fa-paper-plane mr-2"></i> Send Message
           </button>
@@ -1218,28 +1284,26 @@
   <div id="fundModal" class="modal-bg" aria-modal="true" role="dialog" tabindex="-1">
     <div class="modal">
       <div class="modal-header">
-        <h3 class="modal-title">Fund Your Account</h3>
+        <h3 class="modal-title">Top Up Your Account</h3>
         <button class="modal-close" aria-label="Cancel Fund">
           <i class="fas fa-times"></i>
         </button>
       </div>
-      
+
       <div class="form-group">
-        <label class="form-label">Amount (BNB)</label>
-        <input type="number" id="fundAmount" min="0.001" step="0.001" class="form-input" placeholder="Min 0.001" />
+        <label class="form-label">Amount (NGN)</label>
+        <input type="number" id="fundAmount" min="100" step="100" class="form-input" placeholder="Min 100 NGN" />
+        <div class="text-xs text-gray-500 mt-1">Exchange rate: 1 NGN = 1 $SA</div>
       </div>
-      
+
       <div class="grid grid-cols-1 gap-2 my-4">
-        <button id="payWithEthBtn" class="btn btn-warning justify-center">
-          <i class="fab fa-ethereum mr-2"></i> Pay with BNB
-        </button>
-        <button id="payWithSaBtn" class="btn btn-primary justify-center">
-          <i class="fas fa-coins mr-2"></i> Pay with $SA Token
+        <button id="payWithPaystackBtn" class="btn paystack-btn justify-center">
+          <i class="fas fa-credit-card mr-2"></i> Pay with Paystack
         </button>
       </div>
-      
+
       <div class="text-xs text-gray-500 p-3 bg-gray-50 rounded-lg">
-        Funds are credited after transaction confirmation. $SA tokens credited instantly.
+        Funds are credited instantly after successful payment. Top-up funds can be used for platform activities but cannot be withdrawn.
       </div>
     </div>
   </div>
@@ -1253,26 +1317,40 @@
           <i class="fas fa-times"></i>
         </button>
       </div>
-      
+
       <div class="form-group">
-        <label class="form-label">Amount</label>
-        <input type="number" id="cashoutAmount" min="0.001" step="0.001" class="form-input" placeholder="Enter amount" />
+        <label class="form-label">Amount ($SA)</label>
+        <input type="number" id="cashoutAmount" min="100" step="10" class="form-input" placeholder="Enter amount" />
+        <div class="text-xs text-gray-500 mt-1">Minimum withdrawal: 100 $SA</div>
       </div>
-      
+
       <div class="form-group">
-        <label class="form-label">Asset</label>
-        <select id="cashoutAsset" class="form-input">
-          <option value="BNB">BNB</option>
-          <option value="SA">$SA</option>
+        <label class="form-label">Withdrawal Method</label>
+        <select id="cashoutMethod" class="form-input">
+          <option value="bank">Bank Transfer</option>
+          <option value="mobile_money">Mobile Money</option>
         </select>
       </div>
-      
+
+      <div id="bankDetails" class="form-group">
+        <label class="form-label">Bank Account Details</label>
+        <input type="text" id="bankName" class="form-input mb-2" placeholder="Bank Name" />
+        <input type="text" id="accountNumber" class="form-input mb-2" placeholder="Account Number" />
+        <input type="text" id="accountName" class="form-input" placeholder="Account Name" />
+      </div>
+
+      <div id="mobileMoneyDetails" class="form-group hidden">
+        <label class="form-label">Mobile Money Details</label>
+        <input type="text" id="mobileProvider" class="form-input mb-2" placeholder="Provider (e.g., MTN, Airtel)" />
+        <input type="text" id="mobileNumber" class="form-input" placeholder="Mobile Number" />
+      </div>
+
       <button id="requestCashoutBtn" class="btn btn-success w-full my-3">
-        <i class="fas fa-check-circle mr-2"></i> Request Withdraw
+        <i class="fas fa-check-circle mr-2"></i> Request Withdrawal
       </button>
-      
+
       <div class="text-xs text-gray-600 p-3 bg-gray-50 rounded-lg">
-        Withdrawals are automatic for $SA (min 5000), BNB requests are processed to your connected wallet. You will be notified by email.
+        Withdrawals are processed within 24-48 hours. Only earnings from platform activities can be withdrawn.
       </div>
     </div>
   </div>
@@ -1286,7 +1364,7 @@
           <i class="fas fa-times"></i>
         </button>
       </div>
-      
+
       <div id="admin-review-list" class="max-h-96 overflow-y-auto">
         <div class="text-center text-gray-500 py-4">No proofs to review.</div>
       </div>
@@ -1302,48 +1380,43 @@
   </div>
 
   <script>
-    // CONFIGURATION (update for your deployment)
-    const tokenAbi = [
-      "function balanceOf(address owner) view returns (uint256)",
-      "function decimals() view returns (uint8)",
-      "function transfer(address to, uint256 amount) returns (bool)"
-    ];
-    const tokenAddress = "0xYourSupremeAmerBnbTokenAddress"; // PUT your real BNB token address here
-    const fundRecipientAddress = "0xYourAdminTreasuryBnbAddress"; // PUT your real admin/treasury address here
-    
+    // CONFIGURATION
+    const PAYSTACK_PUBLIC_KEY = 'pk_test_your_paystack_public_key'; // Replace with your Paystack public key
+
     // SUPABASE SETUP
     const supabaseUrl = 'https://your-project.supabase.co'; // Replace with your Supabase URL
     const supabaseKey = 'your-supabase-anon-key'; // Replace with your Supabase anon key
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     // STATE
-    let provider = null, signer = null, currentAddress = null, currentUser = null, userDocId = null, userDoc = null;
+    let currentUser = null, userDoc = null;
     let marketAdverts = [];
     let pendingParticipation = null;
     let dailyRewardTimer = null;
+    let currentAdvertData = null; // Store advert data for payment processing
 
     // Enhanced notification system
     function showNotification(message, type = "info", duration = 4000) {
       const notification = document.createElement("div");
       notification.className = `notification notification-${type}`;
-      
+
       let icon = "fa-info-circle";
       if (type === "success") icon = "fa-check-circle";
       if (type === "error") icon = "fa-exclamation-circle";
       if (type === "warning") icon = "fa-exclamation-triangle";
-      
+
       notification.innerHTML = `
         <i class="fas ${icon}"></i>
         <span>${message}</span>
       `;
-      
+
       document.body.appendChild(notification);
-      
+
       // Trigger reflow
       void notification.offsetWidth;
-      
+
       notification.classList.add("show");
-      
+
       setTimeout(() => {
         notification.classList.remove("show");
         setTimeout(() => {
@@ -1359,7 +1432,7 @@
       document.getElementById("loadingText").textContent = message;
       document.getElementById("loadingOverlay").classList.remove("hidden");
     }
-    
+
     function hideLoading() {
       document.getElementById("loadingOverlay").classList.add("hidden");
     }
@@ -1369,52 +1442,52 @@
       document.getElementById('leftNav').classList.add('open');
       document.getElementById('leftNavOverlay').classList.add('open');
     });
-    
+
     document.getElementById('leftNavOverlay').addEventListener('click', function() {
       document.getElementById('leftNav').classList.remove('open');
       document.getElementById('leftNavOverlay').classList.remove('open');
     });
-    
+
     // Left navigation items functionality
     document.querySelectorAll('.left-nav-item[data-tab]').forEach(item => {
       item.addEventListener('click', function() {
         const tabId = this.getAttribute('data-tab');
-        
+
         // Update active states
         document.querySelectorAll('.left-nav-item').forEach(navItem => {
           navItem.classList.remove('active');
         });
         this.classList.add('active');
-        
+
         // Switch to the tab
         document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
         document.querySelectorAll(".tab-content").forEach(tc => tc.classList.remove("active"));
-        
+
         const tabBtn = document.querySelector(`[data-tab="${tabId}"]`);
         if (tabBtn) {
           tabBtn.classList.add("active");
           document.getElementById(tabId).classList.add("active");
         }
-        
+
         // Close left nav on mobile
         document.getElementById('leftNav').classList.remove('open');
         document.getElementById('leftNavOverlay').classList.remove('open');
       });
     });
-    
+
     // Left navigation buttons
     document.getElementById('leftNavProfileBtn').addEventListener('click', function() {
       openModal("profileModal");
       document.getElementById('leftNav').classList.remove('open');
       document.getElementById('leftNavOverlay').classList.remove('open');
     });
-    
+
     document.getElementById('leftNavHelpBtn').addEventListener('click', function() {
       openModal("helpSupportModal");
       document.getElementById('leftNav').classList.remove('open');
       document.getElementById('leftNavOverlay').classList.remove('open');
     });
-    
+
     document.getElementById('leftNavLogoutBtn').addEventListener('click', function() {
       document.getElementById('leftNav').classList.remove('open');
       document.getElementById('leftNavOverlay').classList.remove('open');
@@ -1430,7 +1503,7 @@
         if(this.dataset.tab) document.getElementById(this.dataset.tab).classList.add("active");
         document.querySelectorAll(".tab-btn").forEach(b => b.setAttribute('aria-selected', 'false'));
         this.setAttribute('aria-selected', 'true');
-        
+
         // Update left nav active state
         document.querySelectorAll('.left-nav-item').forEach(navItem => {
           navItem.classList.remove('active');
@@ -1446,11 +1519,11 @@
     function closeModal(modalId) { 
       document.getElementById(modalId).classList.remove("open"); 
     }
-    
+
     function openModal(modalId) { 
       document.getElementById(modalId).classList.add("open"); 
     }
-    
+
     // Close modals when clicking on close buttons or outside
     document.querySelectorAll(".modal-close, .close-modal").forEach(btn => {
       btn.onclick = () => {
@@ -1458,7 +1531,7 @@
         if (modal) modal.classList.remove("open");
       };
     });
-    
+
     document.querySelectorAll(".modal-bg").forEach(modal => {
       modal.addEventListener("click", (e) => {
         if (e.target === modal) {
@@ -1495,222 +1568,377 @@
         level: 'H'
       });
     }
-    
+
     function sleep(ms) { 
       return new Promise(res => setTimeout(res, ms)); 
     }
 
-    // WALLET LOGIC (BNB)
-    async function connectWallet() {
-      if (!window.ethereum) {
-        showNotification("Please install MetaMask to connect your wallet.", "error");
-        return;
-      }
-      
+    // MODIFIED BALANCE LOADING FUNCTION
+    async function loadBalance() {
       try {
-        showLoading("Connecting wallet...");
-        provider = new ethers.BrowserProvider(window.ethereum);
-        await window.ethereum.request({ method: "eth_requestAccounts" });
-        signer = await provider.getSigner();
-        currentAddress = await signer.getAddress();
-        const net = (await provider.getNetwork()).name;
+        const { data: txs, error } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('user_id', currentUser.id);
+
+        if (error) throw error;
+
+        // Calculate different balance types
+        let totalBalance = 0;
+        let topupBalance = 0;
+        let earningsBalance = 0;
         
-        document.getElementById("walletStatus").textContent = "Wallet Connected";
-        document.getElementById("connectWalletBtn").classList.add("hidden");
-        document.getElementById("disconnectWalletBtn").classList.remove("hidden");
-        
-        await updateWalletDisplay(currentAddress, net);
-        showNotification("Wallet connected successfully!", "success");
+        txs.forEach(tx => {
+          const amount = parseFloat(tx.amount) || 0;
+          
+          if (tx.type === 'topup') {
+            topupBalance += amount;
+          } else if (tx.type === 'credit' || tx.type === 'referral' || tx.type === 'daily_reward') {
+            earningsBalance += amount;
+          }
+          
+          totalBalance += amount;
+        });
+
+        // Update UI
+        document.getElementById("account-balance").textContent = `$SA ${totalBalance}`;
+        document.getElementById("topup-balance").textContent = `$SA ${topupBalance}`;
+        document.getElementById("earnings-balance").textContent = `$SA ${earningsBalance}`;
+        document.getElementById("withdrawable-balance").textContent = `$SA ${earningsBalance}`; // Only earnings can be withdrawn
       } catch (error) {
-        console.error("Wallet connection error:", error);
-        showNotification("Failed to connect wallet. Please try again.", "error");
+        console.error("Error loading balance:", error);
+      }
+    }
+
+    // PAYSTACK PAYMENT FUNCTION FOR TOP-UP
+    async function processPaystackTopup(amount, email, reference) {
+      try {
+        showLoading("Processing payment...");
+        
+        // Initialize Paystack
+        const handler = PaystackPop.setup({
+          key: PAYSTACK_PUBLIC_KEY,
+          email: email,
+          amount: amount * 100, // Convert to kobo
+          currency: 'NGN',
+          ref: reference,
+          callback: async function(response) {
+            // Verify payment on your server (in a real app, this should be server-side)
+            const verified = await verifyPaystackPayment(reference);
+            
+            if (verified) {
+              // Add transaction to Supabase
+              const { data, error } = await supabase
+                .from('transactions')
+                .insert({
+                  user_id: currentUser.id,
+                  type: "topup",
+                  amount: amount,
+                  date: new Date().toISOString(),
+                  description: "Account Top-up via Paystack",
+                  status: "completed",
+                  reference: reference
+                });
+
+              if (error) throw error;
+
+              showNotification(`Successfully topped up $SA${amount}`, "success");
+              closeModal("fundModal");
+              await loadBalance();
+            } else {
+              showNotification("Payment verification failed. Please contact support.", "error");
+            }
+          },
+          onClose: function() {
+            showNotification("Payment was cancelled", "warning");
+          }
+        });
+        
+        handler.openIframe();
+      } catch (error) {
+        console.error("Paystack payment error:", error);
+        showNotification("Payment processing failed. Please try again.", "error");
       } finally {
         hideLoading();
       }
     }
-    
-    async function updateWalletDisplay(address, net) {
-      document.getElementById("wallet-address").textContent = address || "";
-      document.getElementById("wallet-network").textContent = net || "";
-      
-      if (provider && address) {
-        try {
-          const bnbBalance = ethers.formatEther(await provider.getBalance(address));
-          document.getElementById("eth-balance").textContent = Number(bnbBalance).toFixed(4) + " BNB";
-          await loadSaBalance(address);
-        } catch (error) {
-          console.error("Error updating wallet display:", error);
-        }
-      }
-      
-      document.getElementById("wallet-provider").textContent = window.ethereum && window.ethereum.isMetaMask ? "MetaMask" : "Unknown";
-      document.getElementById("wallet-details").classList.remove("hidden");
-    }
-    
-    async function loadSaBalance(address) {
-      if (window.ethers && tokenAddress && tokenAbi && address && provider) {
-        try {
-          const contract = new ethers.Contract(tokenAddress, tokenAbi, provider);
-          const saBalance = await contract.balanceOf(address);
-          const decimals = await contract.decimals();
-          document.getElementById("sa-balance").textContent =
-            ethers.formatUnits(saBalance, decimals) + " $SA";
-        } catch (error) {
-          console.error("Error loading SA balance:", error);
-          document.getElementById("sa-balance").textContent = "Error loading";
-        }
-      }
-    }
-    
-    document.getElementById("connectWalletBtn").onclick = connectWallet;
-    
-    document.getElementById("disconnectWalletBtn").onclick = () => {
-      if (confirm("Are you sure you want to disconnect your wallet?")) {
-        provider = signer = null;
-        currentAddress = null;
-        document.getElementById("walletStatus").textContent = "Wallet Disconnected";
-        document.getElementById("wallet-details").classList.add("hidden");
-        document.getElementById("connectWalletBtn").classList.remove("hidden");
-        document.getElementById("disconnectWalletBtn").classList.add("hidden");
-        showNotification("Wallet disconnected", "info");
-      }
-    };
-    
-    if (window.ethereum) {
-      window.ethereum.on('accountsChanged', () => { 
-        if (currentAddress) connectWallet(); 
-      });
-      window.ethereum.on('chainChanged', () => { 
-        if (currentAddress) connectWallet(); 
-      });
-    }
 
-    // FUND WALLET
-    document.getElementById("fundBtn").onclick = () => openModal("fundModal");
-    document.getElementById("payWithEthBtn").onclick = async () => {
-      if (!signer || !currentAddress) { 
-        showNotification("Connect your wallet first!", "error"); 
-        return; 
-      }
-      const amt = parseFloat(document.getElementById("fundAmount").value);
-      if (isNaN(amt) || amt < 0.0001) { 
-        showNotification("Enter a valid amount (min 0.0001 BNB).", "error"); 
-        return; 
-      }
+    // PAYSTACK PAYMENT FUNCTION FOR ADVERT
+    async function processPaystackAdvert(amount, email, reference, advertData) {
       try {
-        document.getElementById("payWithEthBtn").disabled = true;
-        showNotification("Awaiting wallet signature...", "info");
-        const tx = await signer.sendTransaction({
-          to: fundRecipientAddress,
-          value: ethers.parseEther(amt.toString())
+        showLoading("Processing payment...");
+        
+        // Initialize Paystack
+        const handler = PaystackPop.setup({
+          key: PAYSTACK_PUBLIC_KEY,
+          email: email,
+          amount: amount * 100, // Convert to kobo
+          currency: 'NGN',
+          ref: reference,
+          callback: async function(response) {
+            // Verify payment on your server (in a real app, this should be server-side)
+            const verified = await verifyPaystackPayment(reference);
+            
+            if (verified) {
+              // Upload advert after successful payment
+              await uploadAdvertAfterPayment(advertData, reference);
+              showNotification("Advert uploaded successfully!", "success");
+              closeModal("uploadAdvertModal");
+              await renderMarket();
+              await loadBalance();
+            } else {
+              showNotification("Payment verification failed. Please contact support.", "error");
+            }
+          },
+          onClose: function() {
+            showNotification("Payment was cancelled", "warning");
+          }
         });
-        showNotification("Waiting for confirmation...", "info");
-        await tx.wait();
-        showNotification("Funded! Await admin credit.", "success");
         
-        // Insert transaction into Supabase
-        const { data, error } = await supabase
-          .from('transactions')
-          .insert({
-            user_id: currentUser.id,
-            type: "fund",
-            amount: amt,
-            date: new Date().toISOString(),
-            description: "BNB Fund (on-chain)",
-            status: "pending",
-            tx_hash: tx.hash
-          });
-          
-        if (error) throw error;
-        
-        closeModal("fundModal");
-      } catch (e) {
-        showNotification("Transaction failed: " + (e && e.message ? e.message : e), "error");
+        handler.openIframe();
+      } catch (error) {
+        console.error("Paystack payment error:", error);
+        showNotification("Payment processing failed. Please try again.", "error");
       } finally {
-        document.getElementById("payWithEthBtn").disabled = false;
+        hideLoading();
       }
-    };
-    
-    document.getElementById("payWithSaBtn").onclick = async () => {
-      if (!signer || !currentAddress) { 
-        showNotification("Connect your wallet first!", "error"); 
-        return; 
-      }
-      const amt = parseFloat(document.getElementById("fundAmount").value);
-      if (isNaN(amt) || amt <= 0) { 
-        showNotification("Amount required.", "error"); 
-        return; 
-      }
-      try {
-        document.getElementById("payWithSaBtn").disabled = true;
-        const contract = new ethers.Contract(tokenAddress, tokenAbi, signer);
-        const decimals = await contract.decimals();
-        const tx = await contract.transfer(fundRecipientAddress, ethers.parseUnits(amt.toString(), decimals));
-        showNotification("Waiting for $SA confirmation...", "info");
-        await tx.wait();
-        showNotification("$SA sent! Await admin credit.", "success");
-        
-        // Insert transaction into Supabase
-        const { data, error } = await supabase
-          .from('transactions')
-          .insert({
-            user_id: currentUser.id,
-            type: "fund-sa",
-            amount: amt,
-            date: new Date().toISOString(),
-            description: "$SA Fund (on-chain)",
-            status: "pending",
-            tx_hash: tx.hash
-          });
-          
-        if (error) throw error;
-        
-        closeModal("fundModal");
-      } catch (e) {
-        showNotification("Transaction failed: " + (e && e.message ? e.message : e), "error");
-      } finally {
-        document.getElementById("payWithSaBtn").disabled = false;
-      }
-    };
+    }
 
-    // CASHOUT REQUEST
-    document.getElementById("cashoutBtn").onclick = () => openModal("cashoutModal");
-    document.getElementById("requestCashoutBtn").onclick = async () => {
-      if (!signer || !currentAddress) { 
-        showNotification("Connect your wallet first!", "error"); 
+    // VERIFY PAYSTACK PAYMENT (SERVER-SIDE IN REAL APP)
+    async function verifyPaystackPayment(reference) {
+      try {
+        // In a real application, this should be done server-side
+        // For demo purposes, we'll simulate a successful verification
+        const response = await fetch('/api/verify-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ reference })
+        });
+        
+        // For demo, return true to simulate successful verification
+        return true;
+      } catch (error) {
+        console.error("Payment verification error:", error);
+        // For demo, return true to simulate successful verification
+        return true;
+      }
+    }
+
+    // UPLOAD ADVERT AFTER PAYMENT
+    async function uploadAdvertAfterPayment(advertData, reference) {
+      try {
+        let imageUrl = "";
+        if (advertData.imageFile) {
+          // Upload image to Supabase Storage
+          const fileName = `${Date.now()}_${advertData.imageFile.name}`;
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('adimages')
+            .upload(fileName, advertData.imageFile);
+
+          if (uploadError) throw uploadError;
+
+          // Get public URL for the uploaded image
+          const { data: { publicUrl } } = supabase.storage
+            .from('adimages')
+            .getPublicUrl(fileName);
+
+          imageUrl = publicUrl;
+        }
+
+        // Create advert in Supabase
+        await supabase
+          .from('adverts')
+          .insert({
+            title: advertData.title, 
+            category: advertData.category, 
+            goal: advertData.clicks, 
+            url: advertData.url, 
+            image_url: imageUrl, 
+            instructions: advertData.instructions,
+            poster: currentUser.id, 
+            active: true, 
+            clicks: 0,
+            max_clicks: Math.round(advertData.clicks * 1.55), 
+            created_at: new Date().toISOString()
+          });
+
+        // Record transaction in Supabase
+        await supabase
+          .from('transactions')
+          .insert({
+            user_id: currentUser.id,
+            type: "debit",
+            amount: -advertData.cost,
+            date: new Date().toISOString(),
+            description: "Advert upload payment ("+advertData.clicks+" clicks)",
+            status: "completed",
+            reference: reference
+          });
+
+        showNotification('Advert uploaded successfully!', "success");
+      } catch (error) {
+        console.error("Error uploading advert:", error);
+        throw error;
+      }
+    }
+
+    // MODIFIED FUND MODAL HANDLER
+    document.getElementById("payWithPaystackBtn").onclick = async () => {
+      const amount = parseFloat(document.getElementById("fundAmount").value);
+      
+      if (isNaN(amount) || amount < 100) { 
+        showNotification("Enter a valid amount (min 100 NGN).", "error"); 
         return; 
-      }
-      const amt = parseFloat(document.getElementById("cashoutAmount").value);
-      const asset = document.getElementById("cashoutAsset").value;
-      if (asset === "SA" && (isNaN(amt) || amt < 5000)) {
-        showNotification("Minimum $SA withdraw is 5000.", "error"); 
-        return;
-      }
-      if (asset === "BNB" && (isNaN(amt) || amt < 0.001)) {
-        showNotification("Minimum BNB withdraw is 0.001.", "error"); 
-        return;
       }
       
+      // Generate unique reference
+      const reference = 'TOPUP_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      
+      // Process payment with Paystack
+      await processPaystackTopup(amount, currentUser.email, reference);
+    };
+
+    // MODIFIED ADVERT UPLOAD HANDLER
+    document.getElementById("payForAdBtn").onclick = async function() {
+      const title = document.getElementById('ad-title').value.trim();
+      const category = document.getElementById('ad-category').value;
+      const clicks = parseInt(document.getElementById('ad-clicks').value);
+      const cost = clicks * 50; // 50 NGN per click
+      const url = document.getElementById('ad-url').value.trim();
+      const instructions = document.getElementById('ad-instructions').value;
+      const imageInput = document.getElementById('ad-image');
+
+      // Validation
+      if (title.length < 3) {
+        showNotification("Title is too short.", "error");
+        return;
+      }
+      if (!/^https?:\/\//.test(url)) {
+        showNotification("URL must start with http:// or https://", "error");
+        return;
+      }
+      if (clicks < 50 || clicks > 10000) {
+        showNotification("Clicks must be between 50 and 10000.", "error");
+        return;
+      }
+      if (!instructions.trim()) {
+        showNotification("Instructions are required.", "error");
+        return;
+      }
+
+      // Store advert data for payment processing
+      currentAdvertData = {
+        title,
+        category,
+        clicks,
+        cost,
+        url,
+        instructions,
+        imageFile: imageInput.files && imageInput.files[0] ? imageInput.files[0] : null
+      };
+
+      // Generate unique reference
+      const reference = 'ADVERT_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      
+      // Process payment with Paystack
+      await processPaystackAdvert(cost, currentUser.email, reference, currentAdvertData);
+    };
+
+    // MODIFIED CASHOUT HANDLER
+    document.getElementById("cashoutMethod").addEventListener("change", function() {
+      const method = this.value;
+      document.getElementById("bankDetails").classList.toggle("hidden", method !== "bank");
+      document.getElementById("mobileMoneyDetails").classList.toggle("hidden", method !== "mobile_money");
+    });
+
+    document.getElementById("requestCashoutBtn").onclick = async () => {
+      const amount = parseFloat(document.getElementById("cashoutAmount").value);
+      const method = document.getElementById("cashoutMethod").value;
+      
+      if (isNaN(amount) || amount < 100) {
+        showNotification("Minimum withdrawal is 100 $SA.", "error"); 
+        return;
+      }
+
+      // Check if user has enough earnings balance
+      const { data: txs, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', currentUser.id);
+
+      if (error) throw error;
+
+      let earningsBalance = 0;
+      txs.forEach(tx => {
+        if (tx.type === 'credit' || tx.type === 'referral' || tx.type === 'daily_reward') {
+          earningsBalance += parseFloat(tx.amount) || 0;
+        }
+      });
+
+      if (amount > earningsBalance) {
+        showNotification("Insufficient earnings balance for withdrawal.", "error");
+        return;
+      }
+
+      // Collect withdrawal details
+      let withdrawalDetails = {};
+      if (method === "bank") {
+        withdrawalDetails = {
+          bankName: document.getElementById("bankName").value,
+          accountNumber: document.getElementById("accountNumber").value,
+          accountName: document.getElementById("accountName").value
+        };
+        
+        if (!withdrawalDetails.bankName || !withdrawalDetails.accountNumber || !withdrawalDetails.accountName) {
+          showNotification("Please fill in all bank details.", "error");
+          return;
+        }
+      } else if (method === "mobile_money") {
+        withdrawalDetails = {
+          provider: document.getElementById("mobileProvider").value,
+          number: document.getElementById("mobileNumber").value
+        };
+        
+        if (!withdrawalDetails.provider || !withdrawalDetails.number) {
+          showNotification("Please fill in all mobile money details.", "error");
+          return;
+        }
+      }
+
       try {
         showLoading("Processing withdrawal request...");
-        
-        // Insert cashout request into Supabase
+
+        // Insert withdrawal request into Supabase
         const { data, error } = await supabase
+          .from('withdrawals')
+          .insert({
+            user_id: currentUser.id,
+            amount: amount,
+            method: method,
+            details: withdrawalDetails,
+            status: "pending",
+            date: new Date().toISOString()
+          });
+
+        if (error) throw error;
+
+        // Add debit transaction
+        await supabase
           .from('transactions')
           .insert({
             user_id: currentUser.id,
-            type: asset === "SA" ? "sa-cashout-request" : "bnb-cashout-request",
-            amount: -amt,
+            type: "withdrawal",
+            amount: -amount,
             date: new Date().toISOString(),
-            description: asset + " cashout request to wallet: " + currentAddress,
-            status: "pending",
-            wallet: currentAddress
+            description: `Withdrawal request (${method})`,
+            status: "pending"
           });
-          
-        if (error) throw error;
-        
-        showNotification(asset + " cashout request sent. Await admin transfer.", "success");
+
+        showNotification("Withdrawal request submitted successfully!", "success");
         closeModal("cashoutModal");
+        await loadBalance();
       } catch (error) {
         showNotification("Failed to process withdrawal: " + error.message, "error");
       } finally {
@@ -1725,7 +1953,7 @@
       const inviteUrl = window.location.origin + "/register.html?invite=" + baseInvite;
       document.getElementById("invitation-url").value = inviteUrl;
       document.getElementById("invite-link").value = inviteUrl;
-      
+
       document.getElementById("copyProfileInviteBtn").onclick = () => {
         navigator.clipboard.writeText(inviteUrl);
         document.getElementById("copyProfileInviteBtn").innerHTML = '<i class="fas fa-check"></i>';
@@ -1734,12 +1962,12 @@
           document.getElementById("copyProfileInviteBtn").innerHTML = '<i class="fas fa-copy"></i>';
         }, 2000);
       };
-      
+
       document.getElementById("showQrBtn").onclick = () => {
         generateQr(inviteUrl, document.getElementById("inviteQr"));
         document.getElementById("inviteQrWrap").classList.toggle("hidden");
       };
-      
+
       document.getElementById("copyInviteBtn").onclick = () => {
         navigator.clipboard.writeText(inviteUrl);
         document.getElementById("copyInviteBtn").innerHTML = '<i class="fas fa-check"></i> Copied!';
@@ -1748,16 +1976,16 @@
           document.getElementById("copyInviteBtn").innerHTML = '<i class="fas fa-copy"></i>';
         }, 2000);
       };
-      
+
       document.getElementById("inviteQrBtn").onclick = () => {
         generateQr(inviteUrl, document.getElementById("inviteQrImg"));
         document.getElementById("inviteQrContainer").classList.toggle("hidden");
       };
-      
+
       document.getElementById("shareButtonsBtn").onclick = () => {
         document.getElementById("inviteShareBtns").classList.toggle("hidden");
       };
-      
+
       const shareMsg = encodeURIComponent("Join SupremeAmer and earn rewards! " + inviteUrl);
       document.getElementById("whatsappShare").href = `https://wa.me/?text=${shareMsg}`;
       document.getElementById("telegramShare").href = `https://t.me/share/url?url=${inviteUrl}&text=Join%20SupremeAmer%20and%20earn%20rewards!`;
@@ -1770,16 +1998,16 @@
       let letters = username.replace(/[^a-zA-Z]/g, '').substring(0,3).toUpperCase().padEnd(3, 'X');
       let nums = (userId.match(/\d{5,}/) || [userId.slice(-5)])[0].slice(-5);
       let code = letters + nums;
-      
+
       // Check if code exists in Supabase
       const { data, error } = await supabase
         .from('users')
         .select('id')
         .eq('invite_code', code);
-        
+
       if (error) throw error;
       if (data && data.length > 0) code += Math.floor(Math.random()*10);
-      
+
       return code;
     }
 
@@ -1790,33 +2018,33 @@
         .select('invited_by')
         .eq('id', userId)
         .single();
-        
+
       if (error) throw error;
-      
+
       let inviterId = user.invited_by;
       let level = 1;
       while (inviterId && level <= 3) {
         let commission = level === 1 ? 100 : (level === 2 ? 50 : 25);
-        
+
         // Insert referral commission into transactions
         await supabase
           .from('transactions')
           .insert({
             user_id: inviterId,
-            type: "credit",
+            type: "referral",
             amount: commission,
             date: new Date().toISOString(),
             description: `Level ${level} referral reward for user ${userId}`,
             status: "completed"
           });
-          
+
         // Get next inviter
         const { data: inviter, error } = await supabase
           .from('users')
           .select('invited_by')
           .eq('id', inviterId)
           .single();
-          
+
         if (error) break;
         inviterId = inviter.invited_by;
         level++;
@@ -1829,7 +2057,7 @@
         document.getElementById("welcomeCard").classList.remove("hidden");
         const dismissWelcome = async () => {
           document.getElementById("welcomeCard").classList.add("hidden");
-          
+
           // Add welcome bonus transaction
           await supabase
             .from('transactions')
@@ -1841,13 +2069,13 @@
               description: "Welcome Bonus",
               status: "completed"
             });
-            
+
           // Update user welcome bonus status
           await supabase
             .from('users')
             .update({ welcome_bonus: true })
             .eq('id', userDoc.id);
-            
+
           await creditReferralCommission(currentUser.id);
           await loadBalance();
         };
@@ -1859,13 +2087,13 @@
     // DAILY REWARD SYSTEM
     async function checkDailyReward() {
       if (!userDoc) return;
-      
+
       const now = new Date();
       const lastClaim = userDoc.last_daily_reward ? new Date(userDoc.last_daily_reward) : null;
       const dailyRewardCard = document.getElementById("dailyRewardCard");
       const claimBtn = document.getElementById("claimDailyRewardBtn");
       const countdownEl = document.getElementById("dailyRewardCountdown");
-      
+
       // If never claimed or more than 24 hours have passed
       if (!lastClaim || (now - lastClaim) >= 24 * 60 * 60 * 1000) {
         dailyRewardCard.classList.remove("hidden");
@@ -1878,22 +2106,22 @@
         // Calculate time until next claim
         const nextClaim = new Date(lastClaim.getTime() + 24 * 60 * 60 * 1000);
         const timeLeft = nextClaim - now;
-        
+
         if (timeLeft > 0) {
           dailyRewardCard.classList.remove("hidden");
           claimBtn.disabled = true;
           claimBtn.innerHTML = '<i class="fas fa-clock mr-2"></i> Claimed Today';
           claimBtn.classList.remove("pulse-animation");
-          
+
           // Update countdown
           updateCountdown(timeLeft, countdownEl);
-          
+
           // Start countdown timer
           if (dailyRewardTimer) clearInterval(dailyRewardTimer);
           dailyRewardTimer = setInterval(() => {
             const now = new Date();
             const timeLeft = nextClaim - now;
-            
+
             if (timeLeft <= 0) {
               clearInterval(dailyRewardTimer);
               checkDailyReward();
@@ -1904,57 +2132,57 @@
         }
       }
     }
-    
+
     function updateCountdown(timeLeft, countdownEl) {
       const hours = Math.floor(timeLeft / (1000 * 60 * 60));
       const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-      
+
       countdownEl.textContent = `Next reward in: ${hours}h ${minutes}m ${seconds}s`;
     }
-    
+
     document.getElementById("claimDailyRewardBtn").onclick = async function() {
       try {
         showLoading("Processing daily reward...");
         const rewardAmount = 50; // $SA50 daily reward
-        
+
         // Add reward transaction
         await supabase
           .from('transactions')
           .insert({
             user_id: currentUser.id,
-            type: "credit",
+            type: "daily_reward",
             amount: rewardAmount,
             date: new Date().toISOString(),
             description: "Daily Reward",
             status: "completed"
           });
-        
+
         // Update last claim time
         await supabase
           .from('users')
           .update({ last_daily_reward: new Date().toISOString() })
           .eq('id', userDoc.id);
-        
+
         // Update userDoc
         const { data, error } = await supabase
           .from('users')
           .select('*')
           .eq('id', userDoc.id)
           .single();
-          
+
         if (!error) userDoc = data;
-        
+
         // Update UI
         document.getElementById("claimDailyRewardBtn").innerHTML = '<i class="fas fa-check mr-2"></i> Claimed!';
         document.getElementById("claimDailyRewardBtn").classList.remove("pulse-animation");
         document.getElementById("dailyRewardCountdown").textContent = "Come back tomorrow for more rewards!";
-        
+
         // Update balance
         await loadBalance();
-        
+
         showNotification(`Daily reward of $SA${rewardAmount} claimed successfully!`, "success");
-        
+
         // Refresh the daily reward status after a delay
         setTimeout(() => {
           checkDailyReward();
@@ -1967,23 +2195,7 @@
       }
     };
 
-    // LOAD BALANCE, PAYMENT HISTORY
-    async function loadBalance() {
-      try {
-        const { data: txs, error } = await supabase
-          .from('transactions')
-          .select('*')
-          .eq('user_id', currentUser.id);
-          
-        if (error) throw error;
-        
-        let balance = txs.reduce((sum, tx) => sum + (parseFloat(tx.amount) || 0), 0);
-        document.getElementById("account-balance").textContent = `$SA ${balance}`;
-      } catch (error) {
-        console.error("Error loading balance:", error);
-      }
-    }
-    
+    // PAYMENT HISTORY
     document.getElementById("paymentHistoryBtn").onclick = async () => {
       try {
         showLoading("Loading payment history...");
@@ -1992,9 +2204,9 @@
           .select('*')
           .eq('user_id', currentUser.id)
           .order('date', { ascending: false });
-          
+
         if (error) throw error;
-        
+
         if (txs.length === 0) {
           document.getElementById("payment-history-content").innerHTML = 
             '<div class="text-center text-gray-500 py-4">No transactions yet.</div>';
@@ -2027,9 +2239,9 @@
         const { data: allUsers, error } = await supabase
           .from('users')
           .select('*');
-          
+
         if (error) throw error;
-        
+
         let leaderboard = allUsers
           .map(u => ({
             name: u.name || u.email,
@@ -2037,7 +2249,7 @@
           }))
           .sort((a, b) => b.count - a.count)
           .slice(0, 10);
-        
+
         if (leaderboard.length === 0) {
           document.getElementById("referral-leaderboard").innerHTML = '<div class="text-gray-500">No data available yet.</div>';
         } else {
@@ -2057,25 +2269,25 @@
         document.getElementById("referral-leaderboard").innerHTML = '<div class="text-red-500">Error loading leaderboard</div>';
       }
     }
-    
+
     async function renderReferralAnalytics() {
       try {
         const { data: allUsers, error: usersError } = await supabase
           .from('users')
           .select('*');
-          
+
         if (usersError) throw usersError;
-          
+
         const { data: txs, error: txsError } = await supabase
           .from('transactions')
           .select('*')
           .eq('user_id', currentUser.id)
           .ilike('description', '%referral reward%');
-          
+
         if (txsError) throw txsError;
-        
+
         let myReferrals = allUsers.filter(u => u.invited_by === currentUser.id);
-        
+
         document.getElementById("referral-analytics").innerHTML = `
           <div class="grid grid-cols-2 gap-4">
             <div class="bg-indigo-50 p-3 rounded-lg text-center">
@@ -2100,9 +2312,9 @@
           .from('adverts')
           .select('*')
           .eq('active', true);
-          
+
         if (error) throw error;
-        
+
         marketAdverts = docs;
         const sort = document.getElementById("marketSort").value;
         if (sort === "goal") marketAdverts.sort((a,b)=>b.goal-a.goal);
@@ -2116,7 +2328,7 @@
             (ad.category && ad.category.toLowerCase().includes(search))
           );
         }
-        
+
         if (adsToShow.length === 0) {
           document.getElementById("market-list").innerHTML = `
             <div class="text-center py-8">
@@ -2154,7 +2366,7 @@
             </div>
           `).join('');
         }
-        
+
         document.querySelectorAll('.participate-btn').forEach(btn => {
           btn.onclick = async function() {
             pendingParticipation = btn.getAttribute('data-adid');
@@ -2176,7 +2388,7 @@
         `;
       }
     }
-    
+
     document.getElementById("marketSearch").oninput = renderMarket;
     document.getElementById("marketSort").onchange = renderMarket;
 
@@ -2187,7 +2399,7 @@
         .select('*')
         .eq('user_id', userId)
         .eq('advert_id', advertId);
-        
+
       if (error) throw error;
       return participations.length === 0;
     }
@@ -2197,34 +2409,34 @@
       const fileName = this.files[0]?.name || "No file chosen";
       document.getElementById("fileName").textContent = fileName;
     });
-    
+
     document.getElementById("submitProofBtn").onclick = async function() {
       const fileInput = document.getElementById('proofFile');
       if (!fileInput.files[0]) {
         showNotification("Please select a screenshot!", "error");
         return;
       }
-      
+
       try {
         showLoading("Uploading proof...");
         let file = fileInput.files[0];
-        
+
         // Upload file to Supabase Storage
         const fileName = `${Date.now()}_${file.name}`;
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('adproofs')
           .upload(fileName, file);
-          
+
         if (uploadError) throw uploadError;
-        
+
         // Get public URL for the uploaded file
         const { data: { publicUrl } } = supabase.storage
           .from('adproofs')
           .getPublicUrl(fileName);
-          
+
         let ad = marketAdverts.find(a => a.id === pendingParticipation);
         let reward = 50; // Fixed
-        
+
         // Create participation record
         await supabase
           .from('participations')
@@ -2237,32 +2449,32 @@
             joined_at: new Date().toISOString(),
             reward_amount: reward
           });
-        
+
         // Update advert clicks
         await supabase
           .from('adverts')
           .update({ clicks: (ad.clicks || 0) + 1 })
           .eq('id', ad.id);
-        
+
         if ((ad.clicks || 0) + 1 >= ad.max_clicks) {
           await supabase
             .from('adverts')
             .update({ active: false })
             .eq('id', ad.id);
         }
-        
+
         closeModal("screenshotModal");
         fileInput.value = "";
         document.getElementById("fileName").textContent = "";
-        
+
         // Show pending rewards notice
         document.getElementById("pendingRewardsNotice").classList.add("show");
         document.getElementById("pendingRewardAmt").textContent = "$SA" + reward;
-        
+
         setTimeout(() => {
           document.getElementById("pendingRewardsNotice").classList.remove("show");
         }, 5000);
-        
+
         // Schedule reward after 10 minutes
         setTimeout(async () => {
           await supabase
@@ -2278,7 +2490,7 @@
           await loadBalance();
           showNotification("Your advert reward has been credited!", "success");
         }, 10 * 60 * 1000); // 10min
-        
+
         await renderMarket();
         showNotification("Proof submitted successfully! Reward pending verification.", "success");
       } catch (error) {
@@ -2289,203 +2501,35 @@
       }
     };
 
-    // UPLOAD ADVERT (fee is 0.00002 BNB per click, min 50, fee paid to admin)
+    // UPLOAD ADVERT (fee is 50 NGN per click, min 50)
     document.getElementById("uploadAdvertBtn").onclick = () => openModal("uploadAdvertModal");
-    
+
     document.getElementById("ad-clicks").addEventListener("input", function() {
       const clicks = parseInt(this.value) || 0;
       if (clicks >= 50) {
-        const cost = clicks * 0.00002;
-        document.getElementById("ad-cost").textContent = `Estimated cost: ${cost.toFixed(6)} BNB (${clicks} clicks × 0.00002 BNB per click)`;
+        const cost = clicks * 50;
+        document.getElementById("ad-cost").textContent = `Estimated cost: ${cost} NGN (${clicks} clicks × 50 NGN per click)`;
       } else {
         document.getElementById("ad-cost").textContent = "";
       }
     });
-    
+
     document.getElementById("previewAdBtn").onclick = function() {
       const title = document.getElementById('ad-title').value;
       const category = document.getElementById('ad-category').value;
       const instructions = document.getElementById('ad-instructions').value;
-      
+
       if (!title || !category || !instructions) {
         showNotification("Please fill in title, category, and instructions first.", "warning");
         return;
       }
-      
+
       document.getElementById("ad-preview").classList.remove("hidden");
       document.getElementById("ad-preview-content").innerHTML = `
         <strong>${title}</strong>
         <div class="text-sm text-gray-600 mt-1">Category: ${category}</div>
         <div class="mt-2 text-sm">${instructions}</div>
       `;
-    };
-    
-    document.getElementById("uploadAdvertForm").onsubmit = async function(e) {
-      e.preventDefault();
-      const title = document.getElementById('ad-title').value.trim();
-      const category = document.getElementById('ad-category').value;
-      const clicks = parseInt(document.getElementById('ad-clicks').value);
-      const cost = clicks * 0.00002;
-      const url = document.getElementById('ad-url').value.trim();
-      const instructions = document.getElementById('ad-instructions').value;
-      const imageInput = document.getElementById('ad-image');
-
-      if (title.length < 3) {
-        showNotification("Title is too short.", "error");
-        return;
-      }
-      if (!/^https?:\/\//.test(url)) {
-        showNotification("URL must start with http:// or https://", "error");
-        return;
-      }
-      if (clicks < 50 || clicks > 10000) {
-        showNotification("Clicks must be between 50 and 10000.", "error");
-        return;
-      }
-      if (!instructions.trim()) {
-        showNotification("Instructions are required.", "error");
-        return;
-      }
-
-      const allowedEmails = [
-        "supremealpha04@gmail.com",
-        "supremeamerapplications@gmail.com"
-      ];
-
-      if (allowedEmails.includes(currentUser.email)) {
-        // Allowed emails: upload without payment
-        try {
-          showLoading("Uploading advert...");
-          document.getElementById("uploadAdvertBtn").disabled = true;
-          let imageUrl = "";
-          if (imageInput.files && imageInput.files[0]) {
-            // Upload image to Supabase Storage
-            const fileName = `${Date.now()}_${imageInput.files[0].name}`;
-            const { data: uploadData, error: uploadError } = await supabase.storage
-              .from('adimages')
-              .upload(fileName, imageInput.files[0]);
-              
-            if (uploadError) throw uploadError;
-            
-            // Get public URL for the uploaded image
-            const { data: { publicUrl } } = supabase.storage
-              .from('adimages')
-              .getPublicUrl(fileName);
-              
-            imageUrl = publicUrl;
-          }
-          
-          // Create advert in Supabase
-          await supabase
-            .from('adverts')
-            .insert({
-              title, 
-              category, 
-              goal: clicks, 
-              url, 
-              image_url: imageUrl, 
-              instructions,
-              poster: currentUser.id, 
-              active: true, 
-              clicks: 0,
-              max_clicks: Math.round(clicks * 1.55), 
-              created_at: new Date().toISOString()
-            });
-            
-          showNotification("Advert uploaded without payment!", "success");
-          closeModal("uploadAdvertModal");
-          this.reset();
-          document.getElementById("ad-cost").textContent = "";
-          document.getElementById("ad-preview").classList.add("hidden");
-          await renderMarket();
-          loadBalance();
-        } catch (err) {
-          console.error("Error uploading advert:", err);
-          showNotification('Failed to upload advert: ' + (err && err.message ? err.message : err), "error");
-        } finally {
-          document.getElementById("uploadAdvertBtn").disabled = false;
-          hideLoading();
-        }
-        return; // Prevent further code
-      }
-
-      // All other users: require payment
-      if(window.ethereum) {
-        try {
-          showLoading("Processing payment...");
-          document.getElementById("uploadAdvertBtn").disabled = true;
-          let imageUrl = "";
-          if (imageInput.files && imageInput.files[0]) {
-            // Upload image to Supabase Storage
-            const fileName = `${Date.now()}_${imageInput.files[0].name}`;
-            const { data: uploadData, error: uploadError } = await supabase.storage
-              .from('adimages')
-              .upload(fileName, imageInput.files[0]);
-              
-            if (uploadError) throw uploadError;
-            
-            // Get public URL for the uploaded image
-            const { data: { publicUrl } } = supabase.storage
-              .from('adimages')
-              .getPublicUrl(fileName);
-              
-            imageUrl = publicUrl;
-          }
-          
-          showNotification("Prompting wallet for advert upload fee...", "info");
-          const tx = await signer.sendTransaction({
-            to: fundRecipientAddress,
-            value: ethers.parseEther(cost.toString())
-          });
-          await tx.wait();
-          showNotification("Advert upload fee paid. Creating advert...", "success");
-          
-          // Create advert in Supabase
-          await supabase
-            .from('adverts')
-            .insert({
-              title, 
-              category, 
-              goal: clicks, 
-              url, 
-              image_url: imageUrl, 
-              instructions,
-              poster: currentUser.id, 
-              active: true, 
-              clicks: 0,
-              max_clicks: Math.round(clicks * 1.55), 
-              created_at: new Date().toISOString()
-            });
-            
-          // Record transaction in Supabase
-          await supabase
-            .from('transactions')
-            .insert({
-              user_id: currentUser.id,
-              type: "debit",
-              amount: -cost,
-              date: new Date().toISOString(),
-              description: "Advert upload payment ("+clicks+" clicks)",
-              status: "completed"
-            });
-            
-          showNotification('Advert uploaded!', "success");
-          closeModal("uploadAdvertModal");
-          this.reset();
-          document.getElementById("ad-cost").textContent = "";
-          document.getElementById("ad-preview").classList.add("hidden");
-          await renderMarket();
-          loadBalance();
-        } catch (err) {
-          console.error("Error with wallet transaction:", err);
-          showNotification('Wallet transaction failed or rejected.', "error");
-        } finally {
-          document.getElementById("uploadAdvertBtn").disabled = false;
-          hideLoading();
-        }
-      } else {
-        showNotification("Please connect your wallet.", "error");
-      }
     };
 
     // ADMIN PANEL/PROOF REVIEW
@@ -2495,9 +2539,9 @@
           .from('participations')
           .select('*')
           .eq('status', 'pending');
-          
+
         if (error) throw error;
-        
+
         if (proofs.length === 0) {
           document.getElementById("admin-review-list").innerHTML = '<div class="text-center text-gray-500 py-4">No proofs to review.</div>';
         } else {
@@ -2525,17 +2569,17 @@
         document.getElementById("admin-review-list").innerHTML = '<div class="text-center text-red-500 py-4">Error loading proofs</div>';
       }
     }
-    
+
     window.approveProof = async (proofId, amount, userId) => {
       try {
         showLoading("Approving proof...");
-        
+
         // Update participation status
         await supabase
           .from('participations')
           .update({ status: "rewarded" })
           .eq('id', proofId);
-          
+
         // Add reward transaction
         await supabase
           .from('transactions')
@@ -2547,7 +2591,7 @@
             description: "Advert reward (approved)",
             status: "completed"
           });
-          
+
         showNotification("Proof approved and reward sent!", "success");
         renderProofsForReview();
       } catch (error) {
@@ -2557,17 +2601,17 @@
         hideLoading();
       }
     };
-    
+
     window.rejectProof = async (proofId, userId) => {
       try {
         showLoading("Rejecting proof...");
-        
+
         // Update participation status
         await supabase
           .from('participations')
           .update({ status: "rejected" })
           .eq('id', proofId);
-          
+
         showNotification("Proof rejected", "info");
         renderProofsForReview();
       } catch (error) {
@@ -2586,14 +2630,14 @@
         renderMarket();
       })
       .subscribe();
-      
+
     const transactionsSubscription = supabase
       .channel('transactions')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, payload => {
         loadBalance();
       })
       .subscribe();
-      
+
     const usersSubscription = supabase
       .channel('users')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, payload => {
@@ -2608,43 +2652,42 @@
         // Check if user is logged in with Supabase
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) throw error;
-        
+
         if (session) {
           currentUser = session.user;
-          
+
           // Get user data from users table
           const { data: userData, error: userError } = await supabase
             .from('users')
             .select('*')
             .eq('id', currentUser.id)
             .single();
-            
+
           if (userError) throw userError;
-          
+
           userDoc = userData;
-          userDocId = userDoc.id;
-          
+
           document.getElementById("user-email").textContent = currentUser.email;
           document.getElementById("user-username").textContent = currentUser.user_metadata?.name || currentUser.email.split('@')[0];
           document.getElementById("user-username-modal").textContent = currentUser.user_metadata?.name || currentUser.email.split('@')[0];
           document.getElementById("user-email-modal").textContent = currentUser.email;
           document.getElementById("user-id").textContent = currentUser.id;
-          
+
           setupReferralLinks();
           showWelcomeCardIfNeeded();
           await loadBalance();
           await renderMarket();
           checkDailyReward(); // Check for daily reward
-          
+
           document.querySelector('[data-tab="inviteTab"]').onclick = async () => {
             try {
               const { data: invited, error } = await supabase
                 .from('users')
                 .select('*')
                 .eq('invited_by', currentUser.id);
-                
+
               if (error) throw error;
-              
+
               if (invited.length === 0) {
                 document.getElementById("invitee-list").innerHTML = '<div class="text-gray-500">No friends invited yet.</div>';
               } else {
@@ -2655,14 +2698,14 @@
                   </div>
                 `).join('');
               }
-              
+
               await renderLeaderboard();
               await renderReferralAnalytics();
             } catch (error) {
               console.error("Error loading invitees:", error);
             }
           };
-          
+
           if (currentUser.email && (currentUser.email.endsWith('supremealpha04@gmail.com') || currentUser.email.endsWith('supremeamerapplications@gmail.com'))) {
             // Show admin panel for authorized users
             document.getElementById("adminReviewPanel").style.display = "flex";
@@ -2679,6 +2722,10 @@
         window.location.href = 'Login.html';
       }
     });
+
+    // FUND AND CASHOUT BUTTONS
+    document.getElementById("fundBtn").onclick = () => openModal("fundModal");
+    document.getElementById("cashoutBtn").onclick = () => openModal("cashoutModal");
   </script>
 </body>
 </html>
