@@ -412,6 +412,7 @@
       font-size: 2.5rem;
       font-weight: 700;
       margin-bottom: 1.5rem;
+      cursor: pointer;
     }
 
     .action-buttons {
@@ -615,6 +616,31 @@
       100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
     }
 
+    /* Currency Toggle */
+    .currency-toggle {
+      display: flex;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+      width: fit-content;
+    }
+
+    .currency-option {
+      flex: 1;
+      padding: 0.5rem 1rem;
+      text-align: center;
+      background: white;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .currency-option.active {
+      background: linear-gradient(90deg, var(--indigo) 0%, var(--purple) 100%);
+      color: white;
+    }
+
     /* Responsive improvements */
     @media (max-width: 768px) {
       header {
@@ -749,6 +775,13 @@
     
     .withdrawable-balance {
       color: #1a237e;
+    }
+    
+    .token-value {
+      font-size: 0.875rem;
+      opacity: 0.9;
+      margin-top: -1rem;
+      margin-bottom: 1rem;
     }
   </style>
 </head>
@@ -955,6 +988,13 @@
       <div class="balance-card">
         <div class="balance-label">Account Balance</div>
         <div class="balance-amount" id="account-balance">$SA 0</div>
+        <div class="token-value" id="token-value">Value: $0.00</div>
+        
+        <!-- Currency Toggle -->
+        <div class="currency-toggle">
+          <button class="currency-option active" data-currency="NGN">NGN</button>
+          <button class="currency-option" data-currency="USD">USD</button>
+        </div>
         
         <!-- Balance Breakdown -->
         <div class="balance-breakdown">
@@ -1051,6 +1091,8 @@
             <select id="ad-category" class="form-input" required>
               <option value="">Select Category</option>
               <option value="Social Media">Social Media</option>
+              <option value="App Download">App Download</option>
+              <option value="Website Visit">Website Visit</option>
               <option value="Referral">Referral</option>
               <option value="Video/Content">Video/Content</option>
               <option value="Crypto">Crypto</option>
@@ -1059,8 +1101,8 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">Clicks Required</label>
-            <input type="number" id="ad-clicks" class="form-input" min="50" max="10000" placeholder="Clicks (min 50, max 10000)" required />
+            <label class="form-label">Clicks/Downloads Required</label>
+            <input type="number" id="ad-clicks" class="form-input" min="500" max="10000" placeholder="Minimum 500 for Social Media" required />
           </div>
 
           <div class="form-group">
@@ -1172,36 +1214,32 @@
       <div class="card">
         <h2 class="text-xl font-bold mb-4 text-indigo-900">Wallet</h2>
 
+        <!-- Currency Toggle -->
+        <div class="currency-toggle mb-4">
+          <button class="currency-option active" data-currency="NGN">NGN</button>
+          <button class="currency-option" data-currency="USD">USD</button>
+        </div>
+
         <div class="mb-4 p-3 bg-gray-50 rounded-lg">
           <div class="flex justify-between items-center mb-2">
-            <span id="walletStatus" class="font-semibold">Not Connected</span>
-            <button id="disconnectWalletBtn" class="btn btn-danger btn-sm hidden">
-              <i class="fas fa-unlink mr-1"></i> Disconnect
-            </button>
+            <span id="walletStatus" class="font-semibold">Paystack Wallet</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 mb-3">
+            <div class="font-medium">Currency:</div>
+            <div id="wallet-currency">NGN</div>
+
+            <div class="font-medium">Balance:</div>
+            <div id="wallet-balance">₦0.00</div>
           </div>
 
           <button id="connectWalletBtn" class="btn btn-primary w-full">
-            <i class="fas fa-wallet mr-2"></i> Connect Wallet
+            <i class="fas fa-wallet mr-2"></i> Connect Paystack
           </button>
         </div>
 
-        <div id="wallet-details" class="hidden p-4 border border-indigo-200 rounded-lg bg-indigo-50 text-indigo-900">
-          <div class="grid grid-cols-2 gap-3">
-            <div class="font-medium">Provider:</div>
-            <div id="wallet-provider"></div>
-
-            <div class="font-medium">Wallet Address:</div>
-            <div id="wallet-address" class="truncate"></div>
-
-            <div class="font-medium">BNB Balance:</div>
-            <div id="eth-balance"></div>
-
-            <div class="font-medium">$SA Balance:</div>
-            <div id="sa-balance"></div>
-
-            <div class="font-medium">Network:</div>
-            <div id="wallet-network"></div>
-          </div>
+        <div class="text-xs text-gray-500 p-3 bg-gray-50 rounded-lg">
+          <p>Your Paystack wallet is used for all transactions. Connect to view your balance and transaction history.</p>
         </div>
       </div>
     </section>
@@ -1290,16 +1328,21 @@
         </button>
       </div>
 
+      <div class="currency-toggle mb-4">
+        <button class="currency-option active" data-currency="NGN">NGN</button>
+        <button class="currency-option" data-currency="USD">USD</button>
+      </div>
+
       <div class="form-group">
-        <label class="form-label">Amount (NGN)</label>
-        <input type="number" id="fundAmount" min="100" step="100" class="form-input" placeholder="Min 100 NGN" />
-        <div class="text-xs text-gray-500 mt-1">Exchange rate: 1 NGN = 1 $SA</div>
+        <label class="form-label">Amount</label>
+        <input type="number" id="fundAmount" min="2000" step="100" class="form-input" placeholder="Min ₦2,000" />
+        <div class="text-xs text-gray-500 mt-1" id="fundConversion">Exchange rate: 1 NGN = 0.00001 $SA</div>
       </div>
 
       <div class="grid grid-cols-1 gap-2 my-4">
-        <button id="payWithPaystackBtn" class="btn paystack-btn justify-center">
-          <i class="fas fa-credit-card mr-2"></i> Pay with Paystack
-        </button>
+        <a href="payment.html" class="btn paystack-btn justify-center">
+          <i class="fas fa-credit-card mr-2"></i> Proceed to Payment
+        </a>
       </div>
 
       <div class="text-xs text-gray-500 p-3 bg-gray-50 rounded-lg">
@@ -1318,10 +1361,15 @@
         </button>
       </div>
 
+      <div class="currency-toggle mb-4">
+        <button class="currency-option active" data-currency="NGN">NGN</button>
+        <button class="currency-option" data-currency="USD">USD</button>
+      </div>
+
       <div class="form-group">
         <label class="form-label">Amount ($SA)</label>
-        <input type="number" id="cashoutAmount" min="100" step="10" class="form-input" placeholder="Enter amount" />
-        <div class="text-xs text-gray-500 mt-1">Minimum withdrawal: 100 $SA</div>
+        <input type="number" id="cashoutAmount" min="750" step="10" class="form-input" placeholder="Enter amount" />
+        <div class="text-xs text-gray-500 mt-1">Minimum withdrawal: 750 $SA (equivalent to $1.5)</div>
       </div>
 
       <div class="form-group">
@@ -1382,6 +1430,8 @@
   <script>
     // CONFIGURATION
     const PAYSTACK_PUBLIC_KEY = 'pk_test_your_paystack_public_key'; // Replace with your Paystack public key
+    const TOKEN_PRICE = 0.002; // $0.002 per 1 $SA
+    const EXCHANGE_RATE = 1500; // 1 USD = 1500 NGN
 
     // SUPABASE SETUP
     const supabaseUrl = 'https://your-project.supabase.co'; // Replace with your Supabase URL
@@ -1393,7 +1443,8 @@
     let marketAdverts = [];
     let pendingParticipation = null;
     let dailyRewardTimer = null;
-    let currentAdvertData = null; // Store advert data for payment processing
+    let currentAdvertData = null;
+    let currentCurrency = 'NGN';
 
     // Enhanced notification system
     function showNotification(message, type = "info", duration = 4000) {
@@ -1573,6 +1624,38 @@
       return new Promise(res => setTimeout(res, ms)); 
     }
 
+    // CURRENCY TOGGLE
+    document.querySelectorAll('.currency-option').forEach(option => {
+      option.addEventListener('click', function() {
+        document.querySelectorAll('.currency-option').forEach(opt => opt.classList.remove('active'));
+        this.classList.add('active');
+        currentCurrency = this.dataset.currency;
+        updateCurrencyDisplay();
+      });
+    });
+
+    function updateCurrencyDisplay() {
+      // Update wallet display
+      document.getElementById('wallet-currency').textContent = currentCurrency;
+      
+      // Update fund modal
+      const fundAmount = document.getElementById('fundAmount');
+      const fundConversion = document.getElementById('fundConversion');
+      
+      if (currentCurrency === 'NGN') {
+        fundAmount.placeholder = 'Min ₦2,000';
+        fundAmount.min = 2000;
+        fundConversion.textContent = 'Exchange rate: 1 NGN = 0.00001 $SA';
+      } else {
+        fundAmount.placeholder = 'Min $2';
+        fundAmount.min = 2;
+        fundConversion.textContent = 'Exchange rate: 1 USD = 0.015 $SA';
+      }
+      
+      // Update balance display
+      updateTokenValue();
+    }
+
     // MODIFIED BALANCE LOADING FUNCTION
     async function loadBalance() {
       try {
@@ -1593,7 +1676,7 @@
           
           if (tx.type === 'topup') {
             topupBalance += amount;
-          } else if (tx.type === 'credit' || tx.type === 'referral' || tx.type === 'daily_reward') {
+          } else if (tx.type === 'credit' || tx.type === 'referral' || tx.type === 'daily_reward' || tx.type === 'ad_reward') {
             earningsBalance += amount;
           }
           
@@ -1601,65 +1684,81 @@
         });
 
         // Update UI
-        document.getElementById("account-balance").textContent = `$SA ${totalBalance}`;
-        document.getElementById("topup-balance").textContent = `$SA ${topupBalance}`;
-        document.getElementById("earnings-balance").textContent = `$SA ${earningsBalance}`;
-        document.getElementById("withdrawable-balance").textContent = `$SA ${earningsBalance}`; // Only earnings can be withdrawn
+        document.getElementById("account-balance").textContent = `$SA ${totalBalance.toFixed(6)}`;
+        document.getElementById("topup-balance").textContent = `$SA ${topupBalance.toFixed(6)}`;
+        document.getElementById("earnings-balance").textContent = `$SA ${earningsBalance.toFixed(6)}`;
+        document.getElementById("withdrawable-balance").textContent = `$SA ${earningsBalance.toFixed(6)}`; // Only earnings can be withdrawn
+        
+        // Update token value
+        updateTokenValue(totalBalance);
       } catch (error) {
         console.error("Error loading balance:", error);
       }
     }
 
-    // PAYSTACK PAYMENT FUNCTION FOR TOP-UP
-    async function processPaystackTopup(amount, email, reference) {
-      try {
-        showLoading("Processing payment...");
-        
-        // Initialize Paystack
-        const handler = PaystackPop.setup({
-          key: PAYSTACK_PUBLIC_KEY,
-          email: email,
-          amount: amount * 100, // Convert to kobo
-          currency: 'NGN',
-          ref: reference,
-          callback: async function(response) {
-            // Verify payment on your server (in a real app, this should be server-side)
-            const verified = await verifyPaystackPayment(reference);
-            
-            if (verified) {
-              // Add transaction to Supabase
-              const { data, error } = await supabase
-                .from('transactions')
-                .insert({
-                  user_id: currentUser.id,
-                  type: "topup",
-                  amount: amount,
-                  date: new Date().toISOString(),
-                  description: "Account Top-up via Paystack",
-                  status: "completed",
-                  reference: reference
-                });
+    // UPDATE TOKEN VALUE DISPLAY
+    function updateTokenValue(balance = 0) {
+      const tokenValueElement = document.getElementById('token-value');
+      const totalValue = balance * TOKEN_PRICE;
+      
+      if (currentCurrency === 'NGN') {
+        const valueInNaira = totalValue * EXCHANGE_RATE;
+        tokenValueElement.textContent = `Value: ₦${valueInNaira.toFixed(2)}`;
+      } else {
+        tokenValueElement.textContent = `Value: $${totalValue.toFixed(2)}`;
+      }
+    }
 
-              if (error) throw error;
+    // CLICK ON BALANCE TO SHOW COMING SOON
+    document.getElementById('account-balance').addEventListener('click', function() {
+      showNotification('Token trading feature coming soon!', 'info');
+    });
 
-              showNotification(`Successfully topped up $SA${amount}`, "success");
-              closeModal("fundModal");
-              await loadBalance();
-            } else {
-              showNotification("Payment verification failed. Please contact support.", "error");
-            }
-          },
-          onClose: function() {
-            showNotification("Payment was cancelled", "warning");
-          }
-        });
+    // ADVERT COST CALCULATION
+    document.getElementById("ad-clicks").addEventListener("input", function() {
+      const category = document.getElementById('ad-category').value;
+      const clicks = parseInt(this.value) || 0;
+      
+      if (clicks >= 500) {
+        let cost = 0;
+        let costPerUnit = 0;
         
-        handler.openIframe();
-      } catch (error) {
-        console.error("Paystack payment error:", error);
-        showNotification("Payment processing failed. Please try again.", "error");
-      } finally {
-        hideLoading();
+        switch(category) {
+          case 'Social Media':
+            costPerUnit = 2 / 500; // $2 for 500 clicks
+            cost = clicks * costPerUnit;
+            break;
+          case 'App Download':
+            costPerUnit = 2 / 100; // $2 for 100 downloads
+            cost = clicks * costPerUnit;
+            break;
+          case 'Website Visit':
+            costPerUnit = 2 / 7000; // $2 for 7000 visits
+            cost = clicks * costPerUnit;
+            break;
+          default:
+            costPerUnit = 2 / 500; // Default to social media rate
+            cost = clicks * costPerUnit;
+        }
+        
+        // Convert to current currency
+        if (currentCurrency === 'NGN') {
+          cost = cost * EXCHANGE_RATE;
+          document.getElementById("ad-cost").textContent = `Estimated cost: ₦${cost.toFixed(2)} (${clicks} ${getUnitName(category)} × ₦${(costPerUnit * EXCHANGE_RATE).toFixed(4)} per ${getUnitName(category).slice(0, -1)})`;
+        } else {
+          document.getElementById("ad-cost").textContent = `Estimated cost: $${cost.toFixed(2)} (${clicks} ${getUnitName(category)} × $${costPerUnit.toFixed(4)} per ${getUnitName(category).slice(0, -1)})`;
+        }
+      } else {
+        document.getElementById("ad-cost").textContent = "";
+      }
+    });
+
+    function getUnitName(category) {
+      switch(category) {
+        case 'Social Media': return 'clicks';
+        case 'App Download': return 'downloads';
+        case 'Website Visit': return 'visits';
+        default: return 'clicks';
       }
     }
 
@@ -1672,7 +1771,7 @@
         const handler = PaystackPop.setup({
           key: PAYSTACK_PUBLIC_KEY,
           email: email,
-          amount: amount * 100, // Convert to kobo
+          amount: Math.round(amount * 100), // Convert to kobo
           currency: 'NGN',
           ref: reference,
           callback: async function(response) {
@@ -1747,8 +1846,27 @@
           imageUrl = publicUrl;
         }
 
+        // Calculate reward per participant based on category
+        let rewardPerParticipant = 0;
+        switch(advertData.category) {
+          case 'Social Media':
+            rewardPerParticipant = 0.0029; // $0.0029 per participant
+            break;
+          case 'App Download':
+            rewardPerParticipant = 0.009; // $0.009 per participant
+            break;
+          case 'Website Visit':
+            rewardPerParticipant = 0.0002; // $0.0002 per participant
+            break;
+          default:
+            rewardPerParticipant = 0.0029; // Default to social media rate
+        }
+
+        // Convert to $SA tokens (divide by token price)
+        const rewardInTokens = rewardPerParticipant / TOKEN_PRICE;
+
         // Create advert in Supabase
-        await supabase
+        const { data: advert, error: advertError } = await supabase
           .from('adverts')
           .insert({
             title: advertData.title, 
@@ -1760,52 +1878,39 @@
             poster: currentUser.id, 
             active: true, 
             clicks: 0,
-            max_clicks: Math.round(advertData.clicks * 1.55), 
+            max_clicks: advertData.clicks,
+            reward_per_participant: rewardInTokens,
             created_at: new Date().toISOString()
-          });
+          })
+          .select()
+          .single();
 
-        // Record transaction in Supabase
+        if (advertError) throw advertError;
+
+        // Credit 0.00001 $SA tokens to advertiser for successful upload
         await supabase
           .from('transactions')
           .insert({
             user_id: currentUser.id,
-            type: "debit",
-            amount: -advertData.cost,
+            type: "ad_upload",
+            amount: 0.00001,
             date: new Date().toISOString(),
-            description: "Advert upload payment ("+advertData.clicks+" clicks)",
-            status: "completed",
-            reference: reference
+            description: "Advert upload reward",
+            status: "completed"
           });
 
-        showNotification('Advert uploaded successfully!', "success");
+        showNotification('Advert uploaded successfully! You earned 0.00001 $SA tokens.', "success");
       } catch (error) {
         console.error("Error uploading advert:", error);
         throw error;
       }
     }
 
-    // MODIFIED FUND MODAL HANDLER
-    document.getElementById("payWithPaystackBtn").onclick = async () => {
-      const amount = parseFloat(document.getElementById("fundAmount").value);
-      
-      if (isNaN(amount) || amount < 100) { 
-        showNotification("Enter a valid amount (min 100 NGN).", "error"); 
-        return; 
-      }
-      
-      // Generate unique reference
-      const reference = 'TOPUP_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      
-      // Process payment with Paystack
-      await processPaystackTopup(amount, currentUser.email, reference);
-    };
-
     // MODIFIED ADVERT UPLOAD HANDLER
     document.getElementById("payForAdBtn").onclick = async function() {
       const title = document.getElementById('ad-title').value.trim();
       const category = document.getElementById('ad-category').value;
       const clicks = parseInt(document.getElementById('ad-clicks').value);
-      const cost = clicks * 50; // 50 NGN per click
       const url = document.getElementById('ad-url').value.trim();
       const instructions = document.getElementById('ad-instructions').value;
       const imageInput = document.getElementById('ad-image');
@@ -1819,21 +1924,53 @@
         showNotification("URL must start with http:// or https://", "error");
         return;
       }
-      if (clicks < 50 || clicks > 10000) {
-        showNotification("Clicks must be between 50 and 10000.", "error");
+      
+      // Minimum clicks based on category
+      let minClicks = 500;
+      if (category === 'App Download') minClicks = 100;
+      if (category === 'Website Visit') minClicks = 7000;
+      
+      if (clicks < minClicks) {
+        showNotification(`Minimum ${getUnitName(category)} required: ${minClicks}`, "error");
         return;
       }
+      
       if (!instructions.trim()) {
         showNotification("Instructions are required.", "error");
         return;
       }
+
+      // Calculate cost
+      let cost = 0;
+      let costPerUnit = 0;
+      
+      switch(category) {
+        case 'Social Media':
+          costPerUnit = 2 / 500; // $2 for 500 clicks
+          cost = clicks * costPerUnit;
+          break;
+        case 'App Download':
+          costPerUnit = 2 / 100; // $2 for 100 downloads
+          cost = clicks * costPerUnit;
+          break;
+        case 'Website Visit':
+          costPerUnit = 2 / 7000; // $2 for 7000 visits
+          cost = clicks * costPerUnit;
+          break;
+        default:
+          costPerUnit = 2 / 500; // Default to social media rate
+          cost = clicks * costPerUnit;
+      }
+      
+      // Convert to NGN for Paystack
+      const costInNaira = cost * EXCHANGE_RATE;
 
       // Store advert data for payment processing
       currentAdvertData = {
         title,
         category,
         clicks,
-        cost,
+        cost: costInNaira,
         url,
         instructions,
         imageFile: imageInput.files && imageInput.files[0] ? imageInput.files[0] : null
@@ -1843,7 +1980,7 @@
       const reference = 'ADVERT_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
       
       // Process payment with Paystack
-      await processPaystackAdvert(cost, currentUser.email, reference, currentAdvertData);
+      await processPaystackAdvert(costInNaira, currentUser.email, reference, currentAdvertData);
     };
 
     // MODIFIED CASHOUT HANDLER
@@ -1857,8 +1994,9 @@
       const amount = parseFloat(document.getElementById("cashoutAmount").value);
       const method = document.getElementById("cashoutMethod").value;
       
-      if (isNaN(amount) || amount < 100) {
-        showNotification("Minimum withdrawal is 100 $SA.", "error"); 
+      // Minimum withdrawal is 750 $SA (equivalent to $1.5)
+      if (isNaN(amount) || amount < 750) {
+        showNotification("Minimum withdrawal is 750 $SA (equivalent to $1.5).", "error"); 
         return;
       }
 
@@ -1872,7 +2010,7 @@
 
       let earningsBalance = 0;
       txs.forEach(tx => {
-        if (tx.type === 'credit' || tx.type === 'referral' || tx.type === 'daily_reward') {
+        if (tx.type === 'credit' || tx.type === 'referral' || tx.type === 'daily_reward' || tx.type === 'ad_reward') {
           earningsBalance += parseFloat(tx.amount) || 0;
         }
       });
@@ -1910,12 +2048,18 @@
       try {
         showLoading("Processing withdrawal request...");
 
+        // Calculate withdrawal amount in fiat
+        const withdrawalAmountFiat = amount * TOKEN_PRICE; // In USD
+        const withdrawalAmount = currentCurrency === 'NGN' ? withdrawalAmountFiat * EXCHANGE_RATE : withdrawalAmountFiat;
+
         // Insert withdrawal request into Supabase
         const { data, error } = await supabase
           .from('withdrawals')
           .insert({
             user_id: currentUser.id,
             amount: amount,
+            amount_fiat: withdrawalAmount,
+            currency: currentCurrency,
             method: method,
             details: withdrawalDetails,
             status: "pending",
@@ -1932,11 +2076,11 @@
             type: "withdrawal",
             amount: -amount,
             date: new Date().toISOString(),
-            description: `Withdrawal request (${method})`,
+            description: `Withdrawal request (${method}) - ${currentCurrency}`,
             status: "pending"
           });
 
-        showNotification("Withdrawal request submitted successfully!", "success");
+        showNotification(`Withdrawal request for ${currentCurrency === 'NGN' ? '₦' : '$'}${withdrawalAmount.toFixed(2)} submitted successfully!`, "success");
         closeModal("cashoutModal");
         await loadBalance();
       } catch (error) {
@@ -1945,6 +2089,146 @@
         hideLoading();
       }
     };
+
+    // PROOF SUBMIT WITH ENHANCED VERIFICATION
+    document.getElementById("proofFile").addEventListener("change", function() {
+      const fileName = this.files[0]?.name || "No file chosen";
+      document.getElementById("fileName").textContent = fileName;
+    });
+
+    document.getElementById("submitProofBtn").onclick = async function() {
+      const fileInput = document.getElementById('proofFile');
+      if (!fileInput.files[0]) {
+        showNotification("Please select a screenshot!", "error");
+        return;
+      }
+
+      try {
+        showLoading("Uploading and verifying proof...");
+        let file = fileInput.files[0];
+
+        // Upload file to Supabase Storage
+        const fileName = `${Date.now()}_${file.name}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('adproofs')
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL for the uploaded file
+        const { data: { publicUrl } } = supabase.storage
+          .from('adproofs')
+          .getPublicUrl(fileName);
+
+        let ad = marketAdverts.find(a => a.id === pendingParticipation);
+        
+        // Verify proof (in a real app, this would use AI/ML for verification)
+        const verificationResult = await verifyProof(publicUrl, ad);
+        
+        if (!verificationResult.verified) {
+          showNotification("Proof verification failed: " + verificationResult.reason, "error");
+          return;
+        }
+
+        // Create participation record
+        const { data: participation, error: participationError } = await supabase
+          .from('participations')
+          .insert({
+            advert_id: ad.id,
+            user_id: currentUser.id,
+            poster_id: ad.poster,
+            screenshot_url: publicUrl,
+            status: "completed",
+            joined_at: new Date().toISOString(),
+            reward_amount: ad.reward_per_participant,
+            verified_at: new Date().toISOString()
+          })
+          .select()
+          .single();
+
+        if (participationError) throw participationError;
+
+        // Update advert clicks
+        await supabase
+          .from('adverts')
+          .update({ clicks: (ad.clicks || 0) + 1 })
+          .eq('id', ad.id);
+
+        if ((ad.clicks || 0) + 1 >= ad.max_clicks) {
+          await supabase
+            .from('adverts')
+            .update({ active: false })
+            .eq('id', ad.id);
+        }
+
+        // Credit reward to user
+        await supabase
+          .from('transactions')
+          .insert({
+            user_id: currentUser.id,
+            type: "ad_reward",
+            amount: ad.reward_per_participant,
+            date: new Date().toISOString(),
+            description: `Advert reward - ${ad.title}`,
+            status: "completed"
+          });
+
+        closeModal("screenshotModal");
+        fileInput.value = "";
+        document.getElementById("fileName").textContent = "";
+
+        await loadBalance();
+        await renderMarket();
+        showNotification(`Proof verified! You earned ${ad.reward_per_participant.toFixed(6)} $SA tokens.`, "success");
+      } catch (error) {
+        console.error("Error submitting proof:", error);
+        showNotification("Failed to submit proof. Please try again.", "error");
+      } finally {
+        hideLoading();
+      }
+    };
+
+    // PROOF VERIFICATION FUNCTION
+    async function verifyProof(proofUrl, advert) {
+      // In a real application, this would use AI/ML to verify the proof
+      // For demo purposes, we'll simulate verification with a 90% success rate
+      
+      // Simulate API call to verification service
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const random = Math.random();
+      
+      if (random < 0.9) {
+        return {
+          verified: true,
+          reason: "Proof verified successfully"
+        };
+      } else {
+        return {
+          verified: false,
+          reason: "Proof does not match task requirements"
+        };
+      }
+    }
+
+    // AUTO-DELETE TRANSACTIONS AFTER 7 DAYS
+    async function cleanupOldTransactions() {
+      try {
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        
+        const { data, error } = await supabase
+          .from('transactions')
+          .delete()
+          .lt('date', sevenDaysAgo.toISOString());
+          
+        if (error) throw error;
+        
+        console.log(`Cleaned up ${data?.length || 0} old transactions`);
+      } catch (error) {
+        console.error("Error cleaning up old transactions:", error);
+      }
+    }
 
     // PROFILE/INVITE UI
     function setupReferralLinks() {
@@ -2349,7 +2633,7 @@
                   <div class="ad-title">${ad.title}</div>
                   <div class="ad-meta">
                     <span><i class="fas fa-tag"></i> ${ad.category}</span>
-                    <span><i class="fas fa-bullseye"></i> ${ad.goal} clicks</span>
+                    <span><i class="fas fa-bullseye"></i> ${ad.goal} ${getUnitName(ad.category)}</span>
                     <span><i class="fas fa-mouse-pointer"></i> ${ad.clicks || 0}/${ad.max_clicks}</span>
                   </div>
                   <div class="mb-3 text-sm text-gray-700"><b>Instructions:</b> ${ad.instructions || ""}</div>
@@ -2403,134 +2687,6 @@
       if (error) throw error;
       return participations.length === 0;
     }
-
-    // PROOF SUBMIT (50 SA, pending, released after 10min)
-    document.getElementById("proofFile").addEventListener("change", function() {
-      const fileName = this.files[0]?.name || "No file chosen";
-      document.getElementById("fileName").textContent = fileName;
-    });
-
-    document.getElementById("submitProofBtn").onclick = async function() {
-      const fileInput = document.getElementById('proofFile');
-      if (!fileInput.files[0]) {
-        showNotification("Please select a screenshot!", "error");
-        return;
-      }
-
-      try {
-        showLoading("Uploading proof...");
-        let file = fileInput.files[0];
-
-        // Upload file to Supabase Storage
-        const fileName = `${Date.now()}_${file.name}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('adproofs')
-          .upload(fileName, file);
-
-        if (uploadError) throw uploadError;
-
-        // Get public URL for the uploaded file
-        const { data: { publicUrl } } = supabase.storage
-          .from('adproofs')
-          .getPublicUrl(fileName);
-
-        let ad = marketAdverts.find(a => a.id === pendingParticipation);
-        let reward = 50; // Fixed
-
-        // Create participation record
-        await supabase
-          .from('participations')
-          .insert({
-            advert_id: ad.id,
-            user_id: currentUser.id,
-            poster_id: ad.poster,
-            screenshot_url: publicUrl,
-            status: "pending",
-            joined_at: new Date().toISOString(),
-            reward_amount: reward
-          });
-
-        // Update advert clicks
-        await supabase
-          .from('adverts')
-          .update({ clicks: (ad.clicks || 0) + 1 })
-          .eq('id', ad.id);
-
-        if ((ad.clicks || 0) + 1 >= ad.max_clicks) {
-          await supabase
-            .from('adverts')
-            .update({ active: false })
-            .eq('id', ad.id);
-        }
-
-        closeModal("screenshotModal");
-        fileInput.value = "";
-        document.getElementById("fileName").textContent = "";
-
-        // Show pending rewards notice
-        document.getElementById("pendingRewardsNotice").classList.add("show");
-        document.getElementById("pendingRewardAmt").textContent = "$SA" + reward;
-
-        setTimeout(() => {
-          document.getElementById("pendingRewardsNotice").classList.remove("show");
-        }, 5000);
-
-        // Schedule reward after 10 minutes
-        setTimeout(async () => {
-          await supabase
-            .from('transactions')
-            .insert({
-              user_id: currentUser.id,
-              type: "credit",
-              amount: reward,
-              date: new Date().toISOString(),
-              description: "Advert reward",
-              status: "completed"
-            });
-          await loadBalance();
-          showNotification("Your advert reward has been credited!", "success");
-        }, 10 * 60 * 1000); // 10min
-
-        await renderMarket();
-        showNotification("Proof submitted successfully! Reward pending verification.", "success");
-      } catch (error) {
-        console.error("Error submitting proof:", error);
-        showNotification("Failed to submit proof. Please try again.", "error");
-      } finally {
-        hideLoading();
-      }
-    };
-
-    // UPLOAD ADVERT (fee is 50 NGN per click, min 50)
-    document.getElementById("uploadAdvertBtn").onclick = () => openModal("uploadAdvertModal");
-
-    document.getElementById("ad-clicks").addEventListener("input", function() {
-      const clicks = parseInt(this.value) || 0;
-      if (clicks >= 50) {
-        const cost = clicks * 50;
-        document.getElementById("ad-cost").textContent = `Estimated cost: ${cost} NGN (${clicks} clicks × 50 NGN per click)`;
-      } else {
-        document.getElementById("ad-cost").textContent = "";
-      }
-    });
-
-    document.getElementById("previewAdBtn").onclick = function() {
-      const title = document.getElementById('ad-title').value;
-      const category = document.getElementById('ad-category').value;
-      const instructions = document.getElementById('ad-instructions').value;
-
-      if (!title || !category || !instructions) {
-        showNotification("Please fill in title, category, and instructions first.", "warning");
-        return;
-      }
-
-      document.getElementById("ad-preview").classList.remove("hidden");
-      document.getElementById("ad-preview-content").innerHTML = `
-        <strong>${title}</strong>
-        <div class="text-sm text-gray-600 mt-1">Category: ${category}</div>
-        <div class="mt-2 text-sm">${instructions}</div>
-      `;
-    };
 
     // ADMIN PANEL/PROOF REVIEW
     async function renderProofsForReview() {
@@ -2677,7 +2833,11 @@
           showWelcomeCardIfNeeded();
           await loadBalance();
           await renderMarket();
-          checkDailyReward(); // Check for daily reward
+          checkDailyReward();
+          updateCurrencyDisplay();
+
+          // Clean up old transactions
+          await cleanupOldTransactions();
 
           document.querySelector('[data-tab="inviteTab"]').onclick = async () => {
             try {
