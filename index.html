@@ -1668,13 +1668,14 @@
 
   <script>
     // CONFIGURATION
-    const PAYSTACK_PUBLIC_KEY = 'pk_test_your_paystack_public_key'; // Replace with your Paystack public key
+    const PAYSTACK_PUBLIC_KEY = 'pk_live_b12323c99b6fc1081014e9cf05c782c96ba7662e'; // Replace with your Paystack public key
     const TOKEN_PRICE = 0.002; // $0.002 per 1 $SA
-    const EXCHANGE_RATE = 1500; // 1 USD = 1500 NGN
+    const EXCHANGE_RATE = 1460; // 1 USD = 1500 NGN
 
     // SUPABASE SETUP
-    const supabaseUrl = 'https://your-project.supabase.co'; // Replace with your Supabase URL
-    const supabaseKey = 'your-supabase-anon-key'; // Replace with your Supabase anon key
+    const supabaseUrl = 'https://qphbppasrkhqzmsgsnpv.supabase.co'; // Replace with your Supabase URL
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwaGJwcGFzcmtocXptc2dzbnB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0OTM2NjcsImV4cCI6MjA4MDA2OTY2N30.XJ_Hg04lRB7uXrW6gkMy6Ss7xe35zc9BhHQzcE6-sWw
+'; // Replace with your Supabase anon key
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     // STATE
@@ -2671,7 +2672,7 @@
     document.getElementById("claimDailyRewardBtn").onclick = async function() {
       try {
         showLoading("Processing daily reward...");
-        const rewardAmount = 50; // $SA50 daily reward
+        const rewardAmount = 0.000001; // $SA0.000001 daily reward
 
         // Add reward transaction
         await supabase
