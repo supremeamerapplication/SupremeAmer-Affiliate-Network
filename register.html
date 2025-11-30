@@ -4,177 +4,452 @@
   <meta charset="UTF-8" />
   <title>SupremeAmer Registration</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link href="https://fonts.googleapis.com/css?family=Inter:400,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,500,600,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
+    :root {
+      --primary: #4b0082;
+      --primary-light: #7c43bd;
+      --secondary: #ff6b35;
+      --text: #333;
+      --text-light: #666;
+      --border: #e2e8f0;
+      --success: #16a34a;
+      --error: #e11d48;
+      --info: #2563eb;
+      --bg-light: #f8fafc;
+      --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
     body {
       font-family: 'Inter', Arial, sans-serif;
-      background: linear-gradient(120deg, #4b0082 0%, #7c43bd 100%);
+      background: linear-gradient(135deg, #4b0082 0%, #7c43bd 100%);
       min-height: 100vh;
       margin: 0;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 20px;
+      color: var(--text);
     }
-    .register-card {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 24px #0002;
-      padding: 2.5rem 2rem;
+    
+    .register-container {
+      display: flex;
+      max-width: 900px;
       width: 100%;
-      max-width: 390px;
-      animation: fadeIn 0.8s;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.8s ease-out;
     }
-    .register-card h2 {
-      margin-top: 0;
-      color: #4b0082;
-      font-weight: bold;
-      letter-spacing: .02em;
-      margin-bottom: 1.8rem;
+    
+    .brand-section {
+      flex: 1;
+      background: linear-gradient(135deg, rgba(75, 0, 130, 0.9) 0%, rgba(124, 67, 189, 0.9) 100%);
+      color: white;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       text-align: center;
     }
-    .input-group {
-      margin-bottom: 1.3rem;
+    
+    .brand-logo {
+      width: 120px;
+      height: 120px;
+      background-color: white;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
+    
+    .brand-logo img {
+      max-width: 80%;
+      max-height: 80%;
+    }
+    
+    .brand-section h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    
+    .brand-section p {
+      font-size: 1rem;
+      opacity: 0.9;
+      line-height: 1.5;
+      max-width: 300px;
+    }
+    
+    .register-card {
+      flex: 1.2;
+      background: #fff;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    .register-card h2 {
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 10px;
+      font-size: 1.8rem;
+    }
+    
+    .register-subtitle {
+      color: var(--text-light);
+      margin-bottom: 30px;
+      font-size: 0.95rem;
+    }
+    
+    .input-group {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    
     label {
       display: block;
-      font-size: 1rem;
-      color: #444;
-      margin-bottom: .35em;
+      font-size: 0.9rem;
+      color: var(--text);
+      margin-bottom: 0.5rem;
       font-weight: 500;
     }
+    
+    .input-with-icon {
+      position: relative;
+    }
+    
+    .input-with-icon i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+      z-index: 1;
+    }
+    
     input {
       width: 100%;
-      padding: .8em 1em;
-      border: 1.5px solid #c7d2fe;
-      border-radius: 7px;
-      font-size: 1em;
-      background: #f8f8ff;
+      padding: 12px 15px 12px 45px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      background: var(--bg-light);
       outline: none;
-      transition: border .2s;
+      transition: all 0.3s;
     }
+    
     input:focus {
-      border: 1.5px solid #7c43bd;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(75, 0, 130, 0.1);
     }
+    
+    .password-toggle {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-light);
+      cursor: pointer;
+    }
+    
+    .password-strength {
+      margin-top: 8px;
+      height: 4px;
+      border-radius: 2px;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+    
+    .password-strength-bar {
+      height: 100%;
+      width: 0;
+      transition: width 0.3s, background 0.3s;
+      border-radius: 2px;
+    }
+    
+    .password-strength-text {
+      font-size: 0.8rem;
+      margin-top: 5px;
+      color: var(--text-light);
+    }
+    
+    .terms {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .terms input {
+      width: auto;
+      margin-right: 10px;
+      margin-top: 3px;
+    }
+    
+    .terms a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    
+    .terms a:hover {
+      text-decoration: underline;
+    }
+    
     .register-btn {
       width: 100%;
-      padding: .9em;
-      background: linear-gradient(90deg, #4b0082 0%, #7c43bd 100%);
+      padding: 14px;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
       color: #fff;
       border: none;
-      border-radius: 7px;
-      font-size: 1.1em;
-      font-weight: bold;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: background .2s;
-      margin-top: .3em;
-      margin-bottom: 1.2em;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(75, 0, 130, 0.3);
     }
+    
+    .register-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(75, 0, 130, 0.4);
+    }
+    
     .register-btn:active {
-      background: #4b0082;
+      transform: translateY(0);
     }
+    
+    .register-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
     .msg {
       text-align: center;
-      font-size: 1em;
-      margin-bottom: 1em;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
       min-height: 1.3em;
-      padding: 10px;
-      border-radius: 5px;
+      padding: 12px;
+      border-radius: 8px;
+      transition: all 0.3s;
     }
+    
     .msg.error { 
-      color: #e11d48; 
+      color: var(--error); 
       background: #fef2f2;
       border: 1px solid #fecaca;
     }
+    
     .msg.success { 
-      color: #16a34a; 
+      color: var(--success); 
       background: #f0fdf4;
       border: 1px solid #bbf7d0;
     }
+    
     .msg.info { 
-      color: #2563eb; 
+      color: var(--info); 
       background: #eff6ff;
       border: 1px solid #dbeafe;
     }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(40px);} to{opacity:1;transform:translateY(0);} }
-    .note {
+    
+    .login-link {
       text-align: center;
-      font-size: .93em;
-      color: #666;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: var(--text-light);
     }
+    
+    .login-link a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+    
+    .email-confirmation {
+      background: var(--bg-light);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 25px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    
+    .email-confirmation h3 {
+      color: var(--primary);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .email-confirmation p {
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+    
+    .resend-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 15px;
+      font-weight: 500;
+      transition: background 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .resend-btn:hover {
+      background: var(--primary-light);
+    }
+    
+    .resend-btn:disabled {
+      background: #a0a0a0;
+      cursor: not-allowed;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+    
     .loading {
       display: inline-block;
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
       border: 2px solid rgba(255, 255, 255, 0.3);
       border-radius: 50%;
       border-top-color: white;
       animation: spin 1s ease-in-out infinite;
       margin-right: 8px;
     }
+    
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-    .email-confirmation {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 20px;
-      margin: 20px 0;
-      text-align: center;
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    .email-confirmation h3 {
-      color: #4b0082;
-      margin-bottom: 10px;
-    }
-    .resend-btn {
-      background: #4b0082;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    .resend-btn:hover {
-      background: #7c43bd;
+    
+    @media (max-width: 768px) {
+      .register-container {
+        flex-direction: column;
+        max-width: 450px;
+      }
+      
+      .brand-section {
+        padding: 30px 20px;
+      }
+      
+      .brand-section h1 {
+        font-size: 1.6rem;
+      }
+      
+      .register-card {
+        padding: 30px 25px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="register-card">
-    <h2>Join SupremeAmer</h2>
-    <div id="msg" class="msg"></div>
-    
-    <!-- Email Confirmation Section (hidden by default) -->
-    <div id="emailConfirmation" class="email-confirmation hidden">
-      <h3>📧 Check Your Email</h3>
-      <p>We've sent a confirmation link to <strong id="userEmail"></strong></p>
-      <p>Click the link in the email to verify your account and start earning!</p>
-      <button id="resendBtn" class="resend-btn">
-        <i class="fas fa-redo"></i> Resend Confirmation Email
-      </button>
+  <div class="register-container">
+    <div class="brand-section">
+      <div class="brand-logo">
+        <!-- Replace with your actual logo -->
+        <img src="logo.jpg" alt="SupremeAmer Logo">
+      </div>
+      <h1>SupremeAmer</h1>
+      <p>Join our community and start earning rewards today. Create your account in just a few simple steps.</p>
     </div>
+    
+    <div class="register-card">
+      <h2>Create Account</h2>
+      <p class="register-subtitle">Join SupremeAmer to unlock exclusive benefits</p>
+      
+      <div id="msg" class="msg"></div>
 
-    <form id="registerForm" autocomplete="off">
-      <div class="input-group">
-        <label for="registerName">Full Name</label>
-        <input type="text" id="registerName" required maxlength="32" placeholder="Your name">
+      <!-- Email Confirmation Section (hidden by default) -->
+      <div id="emailConfirmation" class="email-confirmation hidden">
+        <h3><i class="fas fa-envelope"></i> Check Your Email</h3>
+        <p>We've sent a confirmation link to <strong id="userEmail"></strong></p>
+        <p>Click the link in the email to verify your account and start earning!</p>
+        <button id="resendBtn" class="resend-btn">
+          <i class="fas fa-redo"></i> Resend Confirmation Email
+        </button>
       </div>
-      <div class="input-group">
-        <label for="registerEmail">Email Address</label>
-        <input type="email" id="registerEmail" required maxlength="64" placeholder="you@email.com">
+
+      <form id="registerForm" autocomplete="off">
+        <div class="input-group">
+          <label for="registerName">Full Name</label>
+          <div class="input-with-icon">
+            <i class="fas fa-user"></i>
+            <input type="text" id="registerName" required maxlength="32" placeholder="Your full name">
+          </div>
+        </div>
+        
+        <div class="input-group">
+          <label for="registerEmail">Email Address</label>
+          <div class="input-with-icon">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="registerEmail" required maxlength="64" placeholder="you@email.com">
+          </div>
+        </div>
+        
+        <div class="input-group">
+          <label for="registerPassword">Password</label>
+          <div class="input-with-icon">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="registerPassword" required minlength="6" maxlength="32" placeholder="At least 6 characters">
+            <button type="button" class="password-toggle" id="passwordToggle">
+              <i class="far fa-eye"></i>
+            </button>
+          </div>
+          <div class="password-strength">
+            <div class="password-strength-bar" id="passwordStrengthBar"></div>
+          </div>
+          <div class="password-strength-text" id="passwordStrengthText"></div>
+        </div>
+        
+        <div class="terms">
+          <input type="checkbox" id="agreeTerms" required>
+          <label for="agreeTerms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+        </div>
+        
+        <button type="submit" class="register-btn" id="registerBtn">
+          <span>Create Account</span>
+        </button>
+      </form>
+      
+      <div class="login-link">
+        Already have an account? <a href="login.html">Login here</a>
       </div>
-      <div class="input-group">
-        <label for="registerPassword">Password</label>
-        <input type="password" id="registerPassword" required minlength="6" maxlength="32" placeholder="At least 6 characters">
-      </div>
-      <button type="submit" class="register-btn" id="registerBtn">
-        <span>Create Account</span>
-      </button>
-    </form>
-    <div class="note">
-      Already have an account? <a href="login.html" style="color:#7c43bd;text-decoration:underline;">Login</a>
     </div>
   </div>
 
@@ -190,6 +465,66 @@
     const userEmailSpan = document.getElementById('userEmail');
     const resendBtn = document.getElementById('resendBtn');
     const msg = document.getElementById('msg');
+    const passwordToggle = document.getElementById('passwordToggle');
+    const passwordInput = document.getElementById('registerPassword');
+    const passwordStrengthBar = document.getElementById('passwordStrengthBar');
+    const passwordStrengthText = document.getElementById('passwordStrengthText');
+
+    // Password visibility toggle
+    passwordToggle.addEventListener('click', function() {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      this.innerHTML = type === 'password' ? '<i class="far fa-eye"></i>' : '<i class="far fa-eye-slash"></i>';
+    });
+
+    // Password strength indicator
+    passwordInput.addEventListener('input', function() {
+      const password = this.value;
+      let strength = 0;
+      let text = '';
+      let color = '';
+      
+      if (password.length > 0) {
+        if (password.length < 6) {
+          strength = 20;
+          text = 'Too short';
+          color = '#e11d48';
+        } else {
+          // Check for character variety
+          const hasLower = /[a-z]/.test(password);
+          const hasUpper = /[A-Z]/.test(password);
+          const hasNumbers = /\d/.test(password);
+          const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+          
+          let criteria = 0;
+          if (hasLower) criteria++;
+          if (hasUpper) criteria++;
+          if (hasNumbers) criteria++;
+          if (hasSpecial) criteria++;
+          
+          if (password.length >= 8) criteria++;
+          
+          if (criteria <= 2) {
+            strength = 40;
+            text = 'Weak';
+            color = '#e11d48';
+          } else if (criteria <= 4) {
+            strength = 70;
+            text = 'Medium';
+            color = '#f59e0b';
+          } else {
+            strength = 100;
+            text = 'Strong';
+            color = '#16a34a';
+          }
+        }
+      }
+      
+      passwordStrengthBar.style.width = `${strength}%`;
+      passwordStrengthBar.style.background = color;
+      passwordStrengthText.textContent = text;
+      passwordStrengthText.style.color = color;
+    });
 
     // DeviceID for anti-fraud
     function getDeviceId() {
@@ -242,7 +577,7 @@
     // Resend confirmation email
     resendBtn.onclick = async function() {
       const email = document.getElementById('registerEmail').value.trim();
-      
+
       setLoading(true);
       showMessage('Sending confirmation email...', 'info');
 
@@ -255,16 +590,16 @@
         if (error) throw error;
 
         showMessage('Confirmation email sent! Check your inbox.', 'success');
-        
+
         // Disable resend button for 60 seconds to prevent spam
         resendBtn.disabled = true;
         let countdown = 60;
         const originalText = resendBtn.innerHTML;
-        
+
         const timer = setInterval(() => {
-          resendBtn.innerHTML = `Resend available in ${countdown}s`;
+          resendBtn.innerHTML = `<i class="fas fa-redo"></i> Resend available in ${countdown}s`;
           countdown--;
-          
+
           if (countdown < 0) {
             clearInterval(timer);
             resendBtn.disabled = false;
@@ -283,13 +618,19 @@
     // Registration form submission
     registerForm.onsubmit = async function(e) {
       e.preventDefault();
-      
+
       const name = document.getElementById('registerName').value.trim();
       const email = document.getElementById('registerEmail').value.trim().toLowerCase();
       const password = document.getElementById('registerPassword').value;
-      
+      const agreeTerms = document.getElementById('agreeTerms').checked;
+
       if (!name || !email || !password) {
         showMessage("All fields are required.", 'error');
+        return;
+      }
+
+      if (!agreeTerms) {
+        showMessage("You must agree to the Terms of Service and Privacy Policy.", 'error');
         return;
       }
 
@@ -313,7 +654,7 @@
         } catch (error) {
           console.log('Could not fetch IP:', error);
         }
-        
+
         const deviceId = getDeviceId();
 
         // 1. Register in Supabase Auth (this will send confirmation email automatically)
@@ -348,7 +689,7 @@
 
         // 2. Create user profile manually
         const inviteCode = generateSimpleInviteCode(authData.user.id, name);
-        
+
         const { error: profileError } = await supabase
           .from('users')
           .insert({
@@ -365,7 +706,7 @@
 
         if (profileError) {
           console.error('Profile creation error:', profileError);
-          
+
           // If profile creation fails, check if it's because user already exists
           if (profileError.code === '23505') { // Unique violation
             // User profile might already exist from trigger, continue
@@ -386,17 +727,6 @@
         setLoading(false);
       }
     };
-
-    // Add real-time validation
-    document.getElementById('registerPassword').addEventListener('input', function() {
-      const password = this.value;
-      
-      if (password.length > 0 && password.length < 6) {
-        showMessage("Password must be at least 6 characters", 'error');
-      } else {
-        showMessage("", 'info');
-      }
-    });
 
     // Check if user is trying to register again (back button)
     window.addEventListener('pageshow', function() {
