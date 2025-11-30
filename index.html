@@ -1427,6 +1427,245 @@
     </div>
   </div>
 
+  <!-- Inline Storage.js Implementation -->
+  <script>
+    // storage.js - Frontend storage utilities for SupremeAmer
+    class SupremeAmerStorage {
+      constructor() {
+        this.buckets = {
+          avatars: 'avatars',
+          adImages: 'ad-images',
+          adProofs: 'ad-proofs',
+          documents: 'documents'
+        };
+      }
+
+      // Generate unique file name
+      generateFileName(userId, originalFileName, fileType = null) {
+        const timestamp = Date.now();
+        const randomString = Math.random().toString(36).substring(2, 15);
+        const safeName = originalFileName.toLowerCase().replace(/[^a-z0-9._-]/g, '_');
+        const extension = originalFileName.split('.').pop();
+        
+        return `${userId}/${timestamp}_${randomString}_${safeName}`;
+      }
+
+      // Upload user avatar
+      async uploadAvatar(file, userId) {
+        try {
+          const fileName = this.generateFileName(userId, file.name, 'avatar');
+          const { data, error } = await supabase.storage
+            .from(this.buckets.avatars)
+            .upload(fileName, file);
+
+          if (error) throw error;
+
+          // Get public URL
+          const { data: { publicUrl } } = supabase.storage
+            .from(this.buckets.avatars)
+            .getPublicUrl(fileName);
+
+          return {
+            success: true,
+            fileName,
+            publicUrl,
+            path: fileName
+          };
+        } catch (error) {
+          console.error('Avatar upload error:', error);
+          return {
+            success: false,
+            error: error.message
+          };
+        }
+      }
+
+      // Upload advert image
+      async uploadAdImage(file, userId) {
+        try {
+          const fileName = this.generateFileName(userId, file.name, 'ad-image');
+          const { data, error } = await supabase.storage
+            .from(this.buckets.adImages)
+            .upload(fileName, file, {
+              cacheControl: '3600',
+              upsert: false
+            });
+
+          if (error) throw error;
+
+          // Get public URL
+          const { data: { publicUrl } } = supabase.storage
+            .from(this.buckets.adImages)
+            .getPublicUrl(fileName);
+
+          return {
+            success: true,
+            fileName,
+            publicUrl,
+            path: fileName
+          };
+        } catch (error) {
+          console.error('Ad image upload error:', error);
+          return {
+            success: false,
+            error: error.message
+          };
+        }
+      }
+
+      // Upload proof screenshot (private)
+      async uploadProofScreenshot(file, userId, participationId) {
+        try {
+          const fileName = this.generateFileName(userId, file.name, 'proof');
+          const { data, error } = await supabase.storage
+            .from(this.buckets.adProofs)
+            .upload(fileName, file, {
+              cacheControl: '0',
+              upsert: false
+            });
+
+          if (error) throw error;
+
+          // Get signed URL for private file (valid for 1 hour)
+          const { data: { signedUrl } } = await supabase.storage
+            .from(this.buckets.adProofs)
+            .createSignedUrl(fileName, 3600);
+
+          return {
+            success: true,
+            fileName,
+            signedUrl,
+            path: fileName
+          };
+        } catch (error) {
+          console.error('Proof screenshot upload error:', error);
+          return {
+            success: false,
+            error: error.message
+          };
+        }
+      }
+
+      // Get proof screenshot URL (for admins and authorized users)
+      async getProofScreenshotUrl(filePath) {
+        try {
+          const { data: { signedUrl }, error } = await supabase.storage
+            .from(this.buckets.adProofs)
+            .createSignedUrl(filePath, 3600); // 1 hour expiry
+
+          if (error) throw error;
+
+          return {
+            success: true,
+            url: signedUrl
+          };
+        } catch (error) {
+          console.error('Error getting proof URL:', error);
+          return {
+            success: false,
+            error: error.message
+          };
+        }
+      }
+
+      // Delete file from storage
+      async deleteFile(bucketName, filePath) {
+        try {
+          const { data, error } = await supabase.storage
+            .from(bucketName)
+            .remove([filePath]);
+
+          if (error) throw error;
+
+          return {
+            success: true,
+            message: 'File deleted successfully'
+          };
+        } catch (error) {
+          console.error('File deletion error:', error);
+          return {
+            success: false,
+            error: error.message
+          };
+        }
+      }
+
+      // Get user storage usage
+      async getUserStorageUsage(userId) {
+        try {
+          const { data, error } = await supabase.rpc('get_user_storage_usage', {
+            user_uuid: userId
+          });
+
+          if (error) throw error;
+
+          return {
+            success: true,
+            usage: data
+          };
+        } catch (error) {
+          console.error('Storage usage fetch error:', error);
+          return {
+            success: false,
+            error: error.message
+          };
+        }
+      }
+
+      // Validate file before upload
+      validateFile(file, allowedTypes, maxSize) {
+        const errors = [];
+
+        // Check file type
+        if (!allowedTypes.includes(file.type)) {
+          errors.push(`File type ${file.type} is not allowed. Allowed types: ${allowedTypes.join(', ')}`);
+        }
+
+        // Check file size
+        if (file.size > maxSize) {
+          const maxSizeMB = (maxSize / 1024 / 1024).toFixed(2);
+          errors.push(`File size ${(file.size / 1024 / 1024).toFixed(2)}MB exceeds maximum allowed ${maxSizeMB}MB`);
+        }
+
+        return {
+          isValid: errors.length === 0,
+          errors
+        };
+      }
+
+      // Get upload constraints for different file types
+      getUploadConstraints(fileType) {
+        const constraints = {
+          avatar: {
+            allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
+            maxSize: 5 * 1024 * 1024, // 5MB
+            bucket: this.buckets.avatars
+          },
+          adImage: {
+            allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
+            maxSize: 10 * 1024 * 1024, // 10MB
+            bucket: this.buckets.adImages
+          },
+          proof: {
+            allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/heic'],
+            maxSize: 10 * 1024 * 1024, // 10MB
+            bucket: this.buckets.adProofs
+          },
+          document: {
+            allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf', 'image/heic'],
+            maxSize: 5 * 1024 * 1024, // 5MB
+            bucket: this.buckets.documents
+          }
+        };
+
+        return constraints[fileType] || constraints.avatar;
+      }
+    }
+
+    // Create global instance
+    const storageManager = new SupremeAmerStorage();
+  </script>
+
   <script>
     // CONFIGURATION
     const PAYSTACK_PUBLIC_KEY = 'pk_test_your_paystack_public_key'; // Replace with your Paystack public key
@@ -1825,25 +2064,27 @@
       }
     }
 
-    // UPLOAD ADVERT AFTER PAYMENT
+    // UPLOAD ADVERT AFTER PAYMENT - MODIFIED TO USE STORAGE.JS
     async function uploadAdvertAfterPayment(advertData, reference) {
       try {
         let imageUrl = "";
         if (advertData.imageFile) {
-          // Upload image to Supabase Storage
-          const fileName = `${Date.now()}_${advertData.imageFile.name}`;
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('adimages')
-            .upload(fileName, advertData.imageFile);
-
-          if (uploadError) throw uploadError;
-
-          // Get public URL for the uploaded image
-          const { data: { publicUrl } } = supabase.storage
-            .from('adimages')
-            .getPublicUrl(fileName);
-
-          imageUrl = publicUrl;
+          // Use storage.js for image upload
+          const constraints = storageManager.getUploadConstraints('adImage');
+          const validation = storageManager.validateFile(advertData.imageFile, constraints.allowedTypes, constraints.maxSize);
+          
+          if (!validation.isValid) {
+            showNotification(validation.errors.join(', '), "error");
+            return;
+          }
+          
+          const uploadResult = await storageManager.uploadAdImage(advertData.imageFile, currentUser.id);
+          
+          if (!uploadResult.success) {
+            throw new Error(uploadResult.error);
+          }
+          
+          imageUrl = uploadResult.publicUrl;
         }
 
         // Calculate reward per participant based on category
@@ -2090,7 +2331,7 @@
       }
     };
 
-    // PROOF SUBMIT WITH ENHANCED VERIFICATION
+    // PROOF SUBMIT WITH ENHANCED VERIFICATION - MODIFIED TO USE STORAGE.JS
     document.getElementById("proofFile").addEventListener("change", function() {
       const fileName = this.files[0]?.name || "No file chosen";
       document.getElementById("fileName").textContent = fileName;
@@ -2107,23 +2348,25 @@
         showLoading("Uploading and verifying proof...");
         let file = fileInput.files[0];
 
-        // Upload file to Supabase Storage
-        const fileName = `${Date.now()}_${file.name}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('adproofs')
-          .upload(fileName, file);
+        // Use storage.js for proof upload
+        const constraints = storageManager.getUploadConstraints('proof');
+        const validation = storageManager.validateFile(file, constraints.allowedTypes, constraints.maxSize);
+        
+        if (!validation.isValid) {
+          showNotification(validation.errors.join(', '), "error");
+          return;
+        }
 
-        if (uploadError) throw uploadError;
-
-        // Get public URL for the uploaded file
-        const { data: { publicUrl } } = supabase.storage
-          .from('adproofs')
-          .getPublicUrl(fileName);
+        const uploadResult = await storageManager.uploadProofScreenshot(file, currentUser.id, pendingParticipation);
+        
+        if (!uploadResult.success) {
+          throw new Error(uploadResult.error);
+        }
 
         let ad = marketAdverts.find(a => a.id === pendingParticipation);
         
         // Verify proof (in a real app, this would use AI/ML for verification)
-        const verificationResult = await verifyProof(publicUrl, ad);
+        const verificationResult = await verifyProof(uploadResult.signedUrl, ad);
         
         if (!verificationResult.verified) {
           showNotification("Proof verification failed: " + verificationResult.reason, "error");
@@ -2137,7 +2380,7 @@
             advert_id: ad.id,
             user_id: currentUser.id,
             poster_id: ad.poster,
-            screenshot_url: publicUrl,
+            screenshot_url: uploadResult.fileName, // Store file path instead of URL
             status: "completed",
             joined_at: new Date().toISOString(),
             reward_amount: ad.reward_per_participant,
@@ -2688,7 +2931,7 @@
       return participations.length === 0;
     }
 
-    // ADMIN PANEL/PROOF REVIEW
+    // ADMIN PANEL/PROOF REVIEW - MODIFIED TO USE STORAGE.JS
     async function renderProofsForReview() {
       try {
         const { data: proofs, error } = await supabase
@@ -2701,9 +2944,26 @@
         if (proofs.length === 0) {
           document.getElementById("admin-review-list").innerHTML = '<div class="text-center text-gray-500 py-4">No proofs to review.</div>';
         } else {
-          document.getElementById("admin-review-list").innerHTML = proofs.map(proof =>
+          // Get signed URLs for proof screenshots
+          const proofsWithUrls = await Promise.all(
+            proofs.map(async (proof) => {
+              const urlResult = await storageManager.getProofScreenshotUrl(proof.screenshot_url);
+              return {
+                ...proof,
+                screenshotUrl: urlResult.success ? urlResult.url : null
+              };
+            })
+          );
+
+          document.getElementById("admin-review-list").innerHTML = proofsWithUrls.map(proof =>
             `<div class="p-3 my-2 border rounded-lg flex flex-col md:flex-row md:items-center gap-3">
-              <img src="${proof.screenshot_url}" class="w-full md:w-32 rounded" alt="Proof screenshot"/>
+              ${proof.screenshotUrl ? `
+                <img src="${proof.screenshotUrl}" class="w-full md:w-32 rounded" alt="Proof screenshot"/>
+              ` : `
+                <div class="w-full md:w-32 h-24 bg-gray-200 rounded flex items-center justify-center">
+                  <i class="fas fa-image text-gray-400 text-2xl"></i>
+                </div>
+              `}
               <div class="flex-1">
                 <div class="font-medium">User: ${proof.user_id}</div>
                 <div class="text-sm text-gray-600">Ad: ${proof.advert_id}</div>
