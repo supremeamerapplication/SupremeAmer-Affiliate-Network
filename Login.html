@@ -127,6 +127,7 @@
       justify-content: center;
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
       overflow: hidden;
+      margin-bottom: 10px;
     }
     
     .logo-image img {
@@ -489,8 +490,10 @@
           <!-- Replace with your actual logo -->
           <img src="logo.jpg" alt="SupremeAmer Logo">
         </div>
-      
-        </div>
+        <div class="logo">
+          <div class="logo-icon">
+            <i class="fas fa-crown"></i>
+          </div>
           SupremeAmer
         </div>
         <div class="subtitle">Affiliate Network for Smart Earners & Advertisers</div>
@@ -719,7 +722,7 @@
             sessionInfo.classList.remove('hidden');
             showSuccess(`Welcome back, ${userData.name || session.user.email}!`);
             
-            // Redirect to home after a brief delay
+            // Redirect to index.html after a brief delay
             setTimeout(() => {
               window.location.href = 'index.html';
             }, 2000);
@@ -930,9 +933,9 @@
         
         showSuccess('Login successful! Redirecting...');
         
-        // Redirect to home after a brief delay
+        // Redirect to index.html after a brief delay
         setTimeout(() => {
-          window.location.href = 'home.html';
+          window.location.href = 'index.html';
         }, 1000);
         
       } catch (error) {
