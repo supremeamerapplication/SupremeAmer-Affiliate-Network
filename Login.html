@@ -87,16 +87,22 @@
       }
     }
     
+    .logo-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      z-index: 2;
+    }
+    
     .logo {
       font-size: 32px;
       font-weight: 700;
-      margin-bottom: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 12px;
-      position: relative;
-      z-index: 2;
     }
     
     .logo-icon {
@@ -111,11 +117,30 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
     
+    .logo-image {
+      width: 120px;
+      height: 120px;
+      background-color: white;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+    
+    .logo-image img {
+      max-width: 80%;
+      max-height: 80%;
+      object-fit: contain;
+    }
+    
     .subtitle {
       font-size: 14px;
       opacity: 0.9;
       position: relative;
       z-index: 2;
+      margin-top: 8px;
     }
     
     .card-body {
@@ -199,6 +224,59 @@
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(123, 67, 189, 0.2);
+    }
+    
+    .input-with-icon {
+      position: relative;
+    }
+    
+    .input-with-icon i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--dark);
+      opacity: 0.6;
+      z-index: 1;
+    }
+    
+    .input-with-icon input {
+      padding-left: 45px;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--dark);
+      opacity: 0.6;
+      cursor: pointer;
+      z-index: 1;
+    }
+    
+    .password-strength {
+      margin-top: 8px;
+      height: 4px;
+      border-radius: 2px;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+    
+    .password-strength-bar {
+      height: 100%;
+      width: 0;
+      transition: width 0.3s, background 0.3s;
+      border-radius: 2px;
+    }
+    
+    .password-strength-text {
+      font-size: 0.8rem;
+      margin-top: 5px;
+      color: var(--dark);
+      opacity: 0.7;
     }
     
     .referral-group {
@@ -395,19 +473,30 @@
         width: 42px;
         height: 42px;
       }
+      
+      .logo-image {
+        width: 100px;
+        height: 100px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="card">
     <div class="card-header">
-      <div class="logo">
-        <div class="logo-icon">
-          <i class="fas fa-crown"></i>
+      <div class="logo-container">
+        <div class="logo-image">
+          <!-- Replace with your actual logo -->
+          <img src="logo.jpg" alt="SupremeAmer Logo">
         </div>
-        SupremeAmer
+        <div class="logo">
+          <div class="logo-icon">
+            <i class="fas fa-crown"></i>
+          </div>
+          SupremeAmer
+        </div>
+        <div class="subtitle">Affiliate Network for Smart Earners & Advertisers</div>
       </div>
-      <div class="subtitle">Affiliate Network for Smart Earners & Advertisers</div>
     </div>
     
     <div class="card-body">
@@ -438,23 +527,42 @@
       <form id="register-form" class="hidden">
         <div class="form-group">
           <label for="reg-username" class="form-label">Username</label>
-          <input type="text" id="reg-username" class="form-input" placeholder="Choose a username" required />
+          <div class="input-with-icon">
+            <i class="fas fa-user"></i>
+            <input type="text" id="reg-username" class="form-input" placeholder="Choose a username" required />
+          </div>
         </div>
         
         <div class="form-group">
           <label for="reg-email" class="form-label">Email</label>
-          <input type="email" id="reg-email" class="form-input" placeholder="Your email address" required />
+          <div class="input-with-icon">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="reg-email" class="form-input" placeholder="Your email address" required />
+          </div>
         </div>
         
         <div class="form-group">
           <label for="reg-password" class="form-label">Password</label>
-          <input type="password" id="reg-password" class="form-input" placeholder="Create a strong password" required />
+          <div class="input-with-icon">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="reg-password" class="form-input" placeholder="Create a strong password" required />
+            <button type="button" class="password-toggle" id="reg-password-toggle">
+              <i class="far fa-eye"></i>
+            </button>
+          </div>
+          <div class="password-strength">
+            <div class="password-strength-bar" id="reg-password-strength-bar"></div>
+          </div>
+          <div class="password-strength-text" id="reg-password-strength-text"></div>
         </div>
         
         <div class="form-group">
           <label for="reg-referral" class="form-label">Referral Code (Optional)</label>
           <div class="referral-group">
-            <input type="text" id="reg-referral" class="form-input" placeholder="Enter referral code" />
+            <div class="input-with-icon" style="flex: 1;">
+              <i class="fas fa-gift"></i>
+              <input type="text" id="reg-referral" class="form-input" placeholder="Enter referral code" />
+            </div>
             <button type="button" id="apply-referral" class="btn btn-secondary">Apply</button>
           </div>
           <div id="referral-notice" class="referral-badge hidden">
@@ -478,12 +586,21 @@
       <form id="login-form">
         <div class="form-group">
           <label for="login-email" class="form-label">Email</label>
-          <input type="email" id="login-email" class="form-input" placeholder="Your email address" required />
+          <div class="input-with-icon">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="login-email" class="form-input" placeholder="Your email address" required />
+          </div>
         </div>
         
         <div class="form-group">
           <label for="login-password" class="form-label">Password</label>
-          <input type="password" id="login-password" class="form-input" placeholder="Your password" required />
+          <div class="input-with-icon">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="login-password" class="form-input" placeholder="Your password" required />
+            <button type="button" class="password-toggle" id="login-password-toggle">
+              <i class="far fa-eye"></i>
+            </button>
+          </div>
         </div>
         
         <button type="submit" id="login-btn" class="btn btn-primary">
@@ -515,10 +632,77 @@
     const sessionInfo = document.getElementById('session-info');
     const logoutSessionBtn = document.getElementById('logout-session');
     const termsAgree = document.getElementById('terms-agree');
+    const regPasswordToggle = document.getElementById('reg-password-toggle');
+    const loginPasswordToggle = document.getElementById('login-password-toggle');
+    const regPasswordInput = document.getElementById('reg-password');
+    const loginPasswordInput = document.getElementById('login-password');
+    const regPasswordStrengthBar = document.getElementById('reg-password-strength-bar');
+    const regPasswordStrengthText = document.getElementById('reg-password-strength-text');
 
     // Initialize toggle indicator position
     toggleIndicator.style.width = `${showLoginBtn.offsetWidth}px`;
     toggleIndicator.style.left = `${showLoginBtn.offsetLeft}px`;
+
+    // Password visibility toggle
+    function setupPasswordToggle(toggleBtn, passwordInput) {
+      toggleBtn.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.innerHTML = type === 'password' ? '<i class="far fa-eye"></i>' : '<i class="far fa-eye-slash"></i>';
+      });
+    }
+
+    setupPasswordToggle(regPasswordToggle, regPasswordInput);
+    setupPasswordToggle(loginPasswordToggle, loginPasswordInput);
+
+    // Password strength indicator
+    regPasswordInput.addEventListener('input', function() {
+      const password = this.value;
+      let strength = 0;
+      let text = '';
+      let color = '';
+      
+      if (password.length > 0) {
+        if (password.length < 6) {
+          strength = 20;
+          text = 'Too short';
+          color = '#dc2626';
+        } else {
+          // Check for character variety
+          const hasLower = /[a-z]/.test(password);
+          const hasUpper = /[A-Z]/.test(password);
+          const hasNumbers = /\d/.test(password);
+          const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+          
+          let criteria = 0;
+          if (hasLower) criteria++;
+          if (hasUpper) criteria++;
+          if (hasNumbers) criteria++;
+          if (hasSpecial) criteria++;
+          
+          if (password.length >= 8) criteria++;
+          
+          if (criteria <= 2) {
+            strength = 40;
+            text = 'Weak';
+            color = '#dc2626';
+          } else if (criteria <= 4) {
+            strength = 70;
+            text = 'Medium';
+            color = '#f59e0b';
+          } else {
+            strength = 100;
+            text = 'Strong';
+            color = '#16a34a';
+          }
+        }
+      }
+      
+      regPasswordStrengthBar.style.width = `${strength}%`;
+      regPasswordStrengthBar.style.background = color;
+      regPasswordStrengthText.textContent = text;
+      regPasswordStrengthText.style.color = color;
+    });
 
     // Check for existing session
     async function checkSession() {
