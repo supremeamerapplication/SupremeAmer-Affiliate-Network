@@ -1840,7 +1840,7 @@
         try {
           const { error } = await supabase.auth.signOut();
           if (error) throw error;
-          window.location.reload();
+          window.location.href = 'Login.html';
         } catch (error) {
           console.error("Logout error:", error);
           showNotification("Logout failed. Please try again.", "error");
@@ -1911,17 +1911,19 @@
         let topupBalance = 0;
         let earningsBalance = 0;
         
-        txs.forEach(tx => {
-          const amount = parseFloat(tx.amount) || 0;
-          
-          if (tx.type === 'topup') {
-            topupBalance += amount;
-          } else if (tx.type === 'credit' || tx.type === 'referral' || tx.type === 'daily_reward' || tx.type === 'ad_reward') {
-            earningsBalance += amount;
-          }
-          
-          totalBalance += amount;
-        });
+        if (txs) {
+          txs.forEach(tx => {
+            const amount = parseFloat(tx.amount) || 0;
+            
+            if (tx.type === 'topup') {
+              topupBalance += amount;
+            } else if (tx.type === 'credit' || tx.type === 'referral' || tx.type === 'daily_reward' || tx.type === 'ad_reward') {
+              earningsBalance += amount;
+            }
+            
+            totalBalance += amount;
+          });
+        }
 
         // Update UI
         document.getElementById("account-balance").textContent = `$SA ${totalBalance.toFixed(6)}`;
@@ -2249,11 +2251,13 @@
       if (error) throw error;
 
       let earningsBalance = 0;
-      txs.forEach(tx => {
-        if (tx.type === 'credit' || tx.type === 'referral' || tx.type === 'daily_reward' || tx.type === 'ad_reward') {
-          earningsBalance += parseFloat(tx.amount) || 0;
-        }
-      });
+      if (txs) {
+        txs.forEach(tx => {
+          if (tx.type === 'credit' || tx.type === 'referral' || tx.type === 'daily_reward' || tx.type === 'ad_reward') {
+            earningsBalance += parseFloat(tx.amount) || 0;
+          }
+        });
+      }
 
       if (amount > earningsBalance) {
         showNotification("Insufficient earnings balance for withdrawal.", "error");
@@ -2479,7 +2483,7 @@
     // PROFILE/INVITE UI
     function setupReferralLinks() {
       // Use inviteCode for referral
-      const baseInvite = userDoc.invite_code || currentUser.id;
+      const baseInvite = (userDoc && userDoc.invite_code) || currentUser.id;
       const inviteUrl = window.location.origin + "/register.html?invite=" + baseInvite;
       document.getElementById("invitation-url").value = inviteUrl;
       document.getElementById("invite-link").value = inviteUrl;
@@ -2583,7 +2587,7 @@
 
     // WELCOME BONUS
     async function showWelcomeCardIfNeeded() {
-      if (!userDoc.welcome_bonus) {
+      if (userDoc && !userDoc.welcome_bonus) {
         document.getElementById("welcomeCard").classList.remove("hidden");
         const dismissWelcome = async () => {
           document.getElementById("welcomeCard").classList.add("hidden");
@@ -2737,7 +2741,7 @@
 
         if (error) throw error;
 
-        if (txs.length === 0) {
+        if (!txs || txs.length === 0) {
           document.getElementById("payment-history-content").innerHTML = 
             '<div class="text-center text-gray-500 py-4">No transactions yet.</div>';
         } else {
@@ -2772,13 +2776,16 @@
 
         if (error) throw error;
 
-        let leaderboard = allUsers
-          .map(u => ({
-            name: u.name || u.email,
-            count: allUsers.filter(us => us.invited_by === u.id).length
-          }))
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 10);
+        let leaderboard = [];
+        if (allUsers) {
+          leaderboard = allUsers
+            .map(u => ({
+              name: u.name || u.email,
+              count: allUsers.filter(us => us.invited_by === u.id).length
+            }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 10);
+        }
 
         if (leaderboard.length === 0) {
           document.getElementById("referral-leaderboard").innerHTML = '<div class="text-gray-500">No data available yet.</div>';
@@ -2814,9 +2821,15 @@
           .eq('user_id', currentUser.id)
           .ilike('description', '%referral reward%');
 
-        if (txsError) throw txsError;
+        let myReferrals = [];
+        if (allUsers) {
+          myReferrals = allUsers.filter(u => u.invited_by === currentUser.id);
+        }
 
-        let myReferrals = allUsers.filter(u => u.invited_by === currentUser.id);
+        let totalEarnings = 0;
+        if (txs) {
+          totalEarnings = txs.reduce((sum, tx) => sum + (parseFloat(tx.amount) || 0), 0);
+        }
 
         document.getElementById("referral-analytics").innerHTML = `
           <div class="grid grid-cols-2 gap-4">
@@ -2825,7 +2838,7 @@
               <div class="text-sm text-indigo-600">Total Invites</div>
             </div>
             <div class="bg-green-50 p-3 rounded-lg text-center">
-              <div class="text-2xl font-bold text-green-800">$SA ${txs.reduce((sum, tx) => sum + (parseFloat(tx.amount) || 0), 0)}</div>
+              <div class="text-2xl font-bold text-green-800">$SA ${totalEarnings}</div>
               <div class="text-sm text-green-600">Total Earnings</div>
             </div>
           </div>
@@ -2845,7 +2858,7 @@
 
         if (error) throw error;
 
-        marketAdverts = docs;
+        marketAdverts = docs || [];
         const sort = document.getElementById("marketSort").value;
         if (sort === "goal") marketAdverts.sort((a,b)=>b.goal-a.goal);
         if (sort === "clicks") marketAdverts.sort((a,b)=>b.clicks-a.clicks);
@@ -2931,7 +2944,7 @@
         .eq('advert_id', advertId);
 
       if (error) throw error;
-      return participations.length === 0;
+      return !participations || participations.length === 0;
     }
 
     // ADMIN PANEL/PROOF REVIEW - MODIFIED TO USE STORAGE.JS
@@ -2944,7 +2957,7 @@
 
         if (error) throw error;
 
-        if (proofs.length === 0) {
+        if (!proofs || proofs.length === 0) {
           document.getElementById("admin-review-list").innerHTML = '<div class="text-center text-gray-500 py-4">No proofs to review.</div>';
         } else {
           // Get signed URLs for proof screenshots
@@ -3064,84 +3077,99 @@
       })
       .subscribe();
 
-    // ON LOAD
+    // ON LOAD - FIXED AUTHENTICATION CHECK
     window.addEventListener("DOMContentLoaded", async () => {
       try {
         // Check if user is logged in with Supabase
         const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) throw error;
+        if (error) {
+          console.error("Session error:", error);
+          // Don't redirect immediately for session errors
+          return;
+        }
 
-        if (session) {
-          currentUser = session.user;
-
-          // Get user data from users table
-          const { data: userData, error: userError } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', currentUser.id)
-            .single();
-
-          if (userError) throw userError;
-
-          userDoc = userData;
-
-          document.getElementById("user-email").textContent = currentUser.email;
-          document.getElementById("user-username").textContent = currentUser.user_metadata?.name || currentUser.email.split('@')[0];
-          document.getElementById("user-username-modal").textContent = currentUser.user_metadata?.name || currentUser.email.split('@')[0];
-          document.getElementById("user-email-modal").textContent = currentUser.email;
-          document.getElementById("user-id").textContent = currentUser.id;
-
-          setupReferralLinks();
-          showWelcomeCardIfNeeded();
-          await loadBalance();
-          await renderMarket();
-          checkDailyReward();
-          updateCurrencyDisplay();
-
-          // Clean up old transactions
-          await cleanupOldTransactions();
-
-          document.querySelector('[data-tab="inviteTab"]').onclick = async () => {
-            try {
-              const { data: invited, error } = await supabase
-                .from('users')
-                .select('*')
-                .eq('invited_by', currentUser.id);
-
-              if (error) throw error;
-
-              if (invited.length === 0) {
-                document.getElementById("invitee-list").innerHTML = '<div class="text-gray-500">No friends invited yet.</div>';
-              } else {
-                document.getElementById("invitee-list").innerHTML = invited.map(u => `
-                  <div class="flex justify-between items-center p-2 border-b">
-                    <div>${u.name || u.email}</div>
-                    <div class="text-xs text-gray-500">${new Date(u.created_at).toLocaleDateString()}</div>
-                  </div>
-                `).join('');
-              }
-
-              await renderLeaderboard();
-              await renderReferralAnalytics();
-            } catch (error) {
-              console.error("Error loading invitees:", error);
-            }
-          };
-
-          if (currentUser.email && (currentUser.email.endsWith('supremealpha04@gmail.com') || currentUser.email.endsWith('supremeamerapplications@gmail.com'))) {
-            // Show admin panel for authorized users
-            document.getElementById("adminReviewPanel").style.display = "flex";
-            renderProofsForReview();
-          }
-        } else {
-          // Not logged in; redirect to login page
-          console.log("User not logged in, redirecting to login page");
+        if (!session) {
+          console.log("No session found, redirecting to login");
           window.location.href = 'Login.html';
+          return;
+        }
+
+        currentUser = session.user;
+        console.log("User authenticated:", currentUser.email);
+
+        // Get user data from users table
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', currentUser.id)
+          .single();
+
+        if (userError) {
+          console.error("Error fetching user data:", userError);
+          // Don't redirect for user data errors, just show basic interface
+          userDoc = {
+            id: currentUser.id,
+            email: currentUser.email,
+            name: currentUser.user_metadata?.name || currentUser.email.split('@')[0],
+            welcome_bonus: false
+          };
+        } else {
+          userDoc = userData;
+        }
+
+        // Update UI with user info
+        document.getElementById("user-email").textContent = currentUser.email;
+        document.getElementById("user-username").textContent = currentUser.user_metadata?.name || currentUser.email.split('@')[0];
+        document.getElementById("user-username-modal").textContent = currentUser.user_metadata?.name || currentUser.email.split('@')[0];
+        document.getElementById("user-email-modal").textContent = currentUser.email;
+        document.getElementById("user-id").textContent = currentUser.id;
+
+        setupReferralLinks();
+        showWelcomeCardIfNeeded();
+        await loadBalance();
+        await renderMarket();
+        checkDailyReward();
+        updateCurrencyDisplay();
+
+        // Clean up old transactions
+        await cleanupOldTransactions();
+
+        document.querySelector('[data-tab="inviteTab"]').onclick = async () => {
+          try {
+            const { data: invited, error } = await supabase
+              .from('users')
+              .select('*')
+              .eq('invited_by', currentUser.id);
+
+            if (error) throw error;
+
+            if (!invited || invited.length === 0) {
+              document.getElementById("invitee-list").innerHTML = '<div class="text-gray-500">No friends invited yet.</div>';
+            } else {
+              document.getElementById("invitee-list").innerHTML = invited.map(u => `
+                <div class="flex justify-between items-center p-2 border-b">
+                  <div>${u.name || u.email}</div>
+                  <div class="text-xs text-gray-500">${new Date(u.created_at).toLocaleDateString()}</div>
+                </div>
+              `).join('');
+            }
+
+            await renderLeaderboard();
+            await renderReferralAnalytics();
+          } catch (error) {
+            console.error("Error loading invitees:", error);
+          }
+        };
+
+        if (currentUser.email && (currentUser.email.endsWith('supremealpha04@gmail.com') || currentUser.email.endsWith('supremeamerapplications@gmail.com'))) {
+          // Show admin panel for authorized users
+          document.getElementById("adminReviewPanel").style.display = "flex";
+          renderProofsForReview();
         }
       } catch (e) {
-        // Not logged in or error
-        console.log("Error loading user:", e);
-        window.location.href = 'Login.html';
+        // Don't redirect for general errors, just log them
+        console.error("Error loading user:", e);
+        showNotification("Error loading user data. Some features may not work.", "warning");
       }
     });
 
