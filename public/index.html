@@ -85,34 +85,57 @@
       align-items: flex-end;
     }
 
-    /* Enhanced tab styling */
-    .tab-btn {
+    /* Main Navigation Bar (replaces left nav) */
+    .main-nav {
+      background: linear-gradient(to right, #1a237e 0%, #7c43bd 100%);
+      box-shadow: 0 2px 12px #1a237e33;
+      position: sticky;
+      top: 76px; /* Height of header */
+      z-index: 999;
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .nav-btn {
       background: none;
       border: none;
-      color: #4b5563;
+      color: rgba(255, 255, 255, 0.8);
       font-weight: 500;
       font-size: 0.875rem;
       cursor: pointer;
-      padding: 0.75rem 0.5rem;
+      padding: 0.75rem 1.25rem;
       border-radius: 12px;
-      transition: var(--transition);
+      transition: all 0.2s ease;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 0.25rem;
+      margin: 0 0.25rem;
     }
 
-    .tab-btn i {
+    .nav-btn i {
       font-size: 1.25rem;
     }
 
-    .tab-btn.active, .tab-btn:focus {
-      background: linear-gradient(90deg, var(--indigo) 60%, var(--purple) 100%);
+    .nav-btn.active, .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
       color: #fff;
       outline: none;
-      box-shadow: 0 4px 12px rgba(123, 67, 189, 0.3);
     }
 
+    .nav-btn:focus {
+      outline: 2px solid rgba(255, 255, 255, 0.5);
+      outline-offset: 2px;
+    }
+
+    /* Tab content */
     .tab-content { 
       display: none; 
     }
@@ -125,95 +148,6 @@
     @keyframes fadeIn { 
       from { opacity: 0; transform: translateY(10px); } 
       to { opacity: 1; transform: translateY(0); } 
-    }
-
-    /* Left Navigation Bar */
-    .left-nav {
-      position: fixed;
-      left: 0;
-      top: 0;
-      height: 100vh;
-      width: 250px;
-      background: linear-gradient(to bottom, #1a237e 0%, #7c43bd 100%);
-      color: white;
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
-      z-index: 2000;
-      padding: 1rem;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-      overflow-y: auto;
-    }
-
-    .left-nav.open {
-      transform: translateX(0);
-    }
-
-    .left-nav-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.5);
-      z-index: 1999;
-      display: none;
-    }
-
-    .left-nav-overlay.open {
-      display: block;
-    }
-
-    .left-nav-header {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 2rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid rgba(255,255,255,0.2);
-    }
-
-    .left-nav-logo {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: white;
-    }
-
-    .left-nav-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-    }
-
-    .left-nav-menu {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .left-nav-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      transition: var(--transition);
-      cursor: pointer;
-      color: rgba(255,255,255,0.9);
-    }
-
-    .left-nav-item:hover {
-      background: rgba(255,255,255,0.1);
-      color: white;
-    }
-
-    .left-nav-item.active {
-      background: rgba(255,255,255,0.2);
-      color: white;
-    }
-
-    .left-nav-item i {
-      width: 20px;
-      text-align: center;
     }
 
     /* Enhanced modal styling */
@@ -281,22 +215,6 @@
 
     .modal-close:hover {
       background: #e5e7eb;
-    }
-
-    /* Footer navigation improvements */
-    .footer-nav {
-      position: fixed; 
-      bottom: 0; 
-      left: 0; 
-      width: 100vw; 
-      z-index: 100;
-      background: #fff; 
-      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
-      display: flex; 
-      justify-content: space-around; 
-      align-items: center;
-      padding: 0.75rem 0;
-      backdrop-filter: blur(10px);
     }
 
     /* Welcome card improvements */
@@ -723,21 +641,24 @@
         width: 100%;
       }
 
-      .footer-nav {
-        padding: 0.5rem 0;
-      }
-
-      .tab-btn {
-        padding: 0.5rem;
-        font-size: 0.75rem;
-      }
-
-      .tab-btn i {
-        font-size: 1.125rem;
-      }
-
       .balance-overview {
         grid-template-columns: repeat(2, 1fr);
+      }
+
+      .nav-container {
+        padding: 0.25rem 0.5rem;
+        overflow-x: auto;
+        justify-content: flex-start;
+      }
+      
+      .nav-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.75rem;
+        min-width: 80px;
+      }
+      
+      .nav-btn i {
+        font-size: 1rem;
       }
     }
 
@@ -817,53 +738,9 @@
 </head>
 <body class="min-h-screen pb-20 bg-gradient-to-b from-indigo-50 to-white">
 
-  <!-- LEFT NAVIGATION -->
-  <div class="left-nav" id="leftNav">
-    <div class="left-nav-header">
-      <div class="left-nav-logo"></div>
-      <div class="left-nav-title">SupremeAmer</div>
-    </div>
-
-    <div class="left-nav-menu">
-      <div class="left-nav-item active" data-tab="homeTab">
-        <i class="fas fa-home"></i>
-        <span>Dashboard</span>
-      </div>
-      <div class="left-nav-item" data-tab="marketTab">
-        <i class="fas fa-store"></i>
-        <span>Marketplace</span>
-      </div>
-      <div class="left-nav-item" data-tab="inviteTab">
-        <i class="fas fa-user-plus"></i>
-        <span>Invite Friends</span>
-      </div>
-      <div class="left-nav-item" data-tab="walletTab">
-        <i class="fas fa-wallet"></i>
-        <span>Wallet</span>
-      </div>
-      <div class="left-nav-item" id="leftNavProfileBtn">
-        <i class="fas fa-user"></i>
-        <span>Profile</span>
-      </div>
-      <div class="left-nav-item" id="leftNavHelpBtn">
-        <i class="fas fa-question-circle"></i>
-        <span>Help & Support</span>
-      </div>
-      <div class="left-nav-item" id="leftNavLogoutBtn">
-        <i class="fas fa-sign-out-alt"></i>
-        <span>Logout</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="left-nav-overlay" id="leftNavOverlay"></div>
-
   <!-- HEADER -->
   <header>
     <div class="logo-container">
-      <button id="leftNavToggle" class="btn btn-secondary btn-sm mr-2">
-        <i class="fas fa-bars"></i>
-      </button>
       <img src="logo.png" alt="SupremeAmer Logo" class="logo" />
       <div>
         <div class="app-name">SupremeAmer</div>
@@ -890,6 +767,32 @@
       </button>
     </div>
   </header>
+
+  <!-- MAIN NAVIGATION BAR (replaces left nav) -->
+  <nav class="main-nav" aria-label="Main Navigation">
+    <div class="nav-container">
+      <button class="nav-btn active" id="home-tab-btn" data-tab="homeTab" aria-controls="homeTab" aria-selected="true">
+        <i class="fas fa-home"></i>
+        <span>Dashboard</span>
+      </button>
+      <button class="nav-btn" id="market-tab-btn" data-tab="marketTab" aria-controls="marketTab">
+        <i class="fas fa-store"></i>
+        <span>Marketplace</span>
+      </button>
+      <button class="nav-btn" id="invite-tab-btn" data-tab="inviteTab" aria-controls="inviteTab">
+        <i class="fas fa-user-plus"></i>
+        <span>Invite Friends</span>
+      </button>
+      <button class="nav-btn" id="wallet-tab-btn" data-tab="walletTab" aria-controls="walletTab">
+        <i class="fas fa-wallet"></i>
+        <span>Wallet</span>
+      </button>
+      <button class="nav-btn" id="helpSupportBtn">
+        <i class="fas fa-question-circle"></i>
+        <span>Help</span>
+      </button>
+    </div>
+  </nav>
 
   <!-- PROFILE MODAL -->
   <div id="profileModal" class="modal-bg" aria-modal="true" role="dialog" tabindex="-1">
@@ -1304,30 +1207,6 @@
       </div>
     </section>
   </main>
-
-  <!-- FOOTER NAVIGATION -->
-  <nav class="footer-nav" aria-label="Footer Navigation">
-    <button class="tab-btn active" id="home-tab-btn" data-tab="homeTab" aria-controls="homeTab" aria-selected="true">
-      <i class="fas fa-home"></i>
-      <span>Home</span>
-    </button>
-    <button class="tab-btn" id="market-tab-btn" data-tab="marketTab" aria-controls="marketTab">
-      <i class="fas fa-store"></i>
-      <span>Market</span>
-    </button>
-    <button class="tab-btn" id="invite-tab-btn" data-tab="inviteTab" aria-controls="inviteTab">
-      <i class="fas fa-user-plus"></i>
-      <span>Invite</span>
-    </button>
-    <button class="tab-btn" id="wallet-tab-btn" data-tab="walletTab" aria-controls="walletTab">
-      <i class="fas fa-wallet"></i>
-      <span>Wallet</span>
-    </button>
-    <button class="tab-btn" id="helpSupportBtn">
-      <i class="fas fa-question-circle"></i>
-      <span>Help</span>
-    </button>
-  </nav>
 
   <!-- MODALS -->
   <!-- Payment History Modal -->
@@ -1788,81 +1667,15 @@
       document.getElementById("loadingOverlay").classList.add("hidden");
     }
 
-    // LEFT NAVIGATION
-    document.getElementById('leftNavToggle').addEventListener('click', function() {
-      document.getElementById('leftNav').classList.add('open');
-      document.getElementById('leftNavOverlay').classList.add('open');
-    });
-
-    document.getElementById('leftNavOverlay').addEventListener('click', function() {
-      document.getElementById('leftNav').classList.remove('open');
-      document.getElementById('leftNavOverlay').classList.remove('open');
-    });
-
-    // Left navigation items functionality
-    document.querySelectorAll('.left-nav-item[data-tab]').forEach(item => {
-      item.addEventListener('click', function() {
-        const tabId = this.getAttribute('data-tab');
-
-        // Update active states
-        document.querySelectorAll('.left-nav-item').forEach(navItem => {
-          navItem.classList.remove('active');
-        });
-        this.classList.add('active');
-
-        // Switch to the tab
-        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-        document.querySelectorAll(".tab-content").forEach(tc => tc.classList.remove("active"));
-
-        const tabBtn = document.querySelector(`[data-tab="${tabId}"]`);
-        if (tabBtn) {
-          tabBtn.classList.add("active");
-          document.getElementById(tabId).classList.add("active");
-        }
-
-        // Close left nav on mobile
-        document.getElementById('leftNav').classList.remove('open');
-        document.getElementById('leftNavOverlay').classList.remove('open');
-      });
-    });
-
-    // Left navigation buttons
-    document.getElementById('leftNavProfileBtn').addEventListener('click', function() {
-      openModal("profileModal");
-      document.getElementById('leftNav').classList.remove('open');
-      document.getElementById('leftNavOverlay').classList.remove('open');
-    });
-
-    document.getElementById('leftNavHelpBtn').addEventListener('click', function() {
-      openModal("helpSupportModal");
-      document.getElementById('leftNav').classList.remove('open');
-      document.getElementById('leftNavOverlay').classList.remove('open');
-    });
-
-    document.getElementById('leftNavLogoutBtn').addEventListener('click', function() {
-      document.getElementById('leftNav').classList.remove('open');
-      document.getElementById('leftNavOverlay').classList.remove('open');
-      document.getElementById("logoutBtn").click();
-    });
-
     // TABS
-    document.querySelectorAll(".tab-btn[data-tab]").forEach(btn => {
+    document.querySelectorAll(".nav-btn[data-tab]").forEach(btn => {
       btn.addEventListener('click', function() {
-        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
         this.classList.add("active");
         document.querySelectorAll(".tab-content").forEach(tc => tc.classList.remove("active"));
         if(this.dataset.tab) document.getElementById(this.dataset.tab).classList.add("active");
-        document.querySelectorAll(".tab-btn").forEach(b => b.setAttribute('aria-selected', 'false'));
+        document.querySelectorAll(".nav-btn").forEach(b => b.setAttribute('aria-selected', 'false'));
         this.setAttribute('aria-selected', 'true');
-
-        // Update left nav active state
-        document.querySelectorAll('.left-nav-item').forEach(navItem => {
-          navItem.classList.remove('active');
-        });
-        const leftNavItem = document.querySelector(`.left-nav-item[data-tab="${this.dataset.tab}"]`);
-        if (leftNavItem) {
-          leftNavItem.classList.add('active');
-        }
       });
     });
 
