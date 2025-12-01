@@ -1,0 +1,147 @@
+import { createClient } from '@supabase/supabase-js';
+import axios from 'axios';
+import crypto from 'crypto';
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
+
+const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
+const PAYSTACK_BASE_URL = 'https://api.paystack.co';
+
+async function verifyPaystackPayment(reference) {
+  try {
+    const response = await axios.get(
+      `${PAYSTACK_BASE_URL}/transaction/verify/${reference}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    const data = response.data;
+    
+    if (!data.status || data.data.status !== 'success') {
+      return { success: false, message: 'Payment verification failed' };
+    }
+
+    return { success: true, data: data.data };
+  } catch (error) {
+    console.error('Paystack verification error:', error.message);
+    return { success: false, message: 'Payment verification failed' };
+  }
+}
+
+export default async function handler(req, res) {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
+
+  // Handle OPTIONS request
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ success: false, message: 'Method not allowed' });
+  }
+
+  try {
+    const { reference, type, userId, email, metadata } = req.body;
+
+    if (!reference || !type || !userId || !email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields'
+      });
+    }
+
+    // Check if already processed
+    const { data: existingTx } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('payment_reference', reference)
+      .single();
+
+    if (existingTx) {
+      return res.json({
+        success: true,
+        message: 'Payment already processed',
+        transaction: existingTx
+      });
+    }
+
+    // Verify with Paystack
+    const verification = await verifyPaystackPayment(reference);
+    
+    if (!verification.success) {
+      return res.status(400).json({
+        success: false,
+        message: verification.message
+      });
+    }
+
+    const paymentData = verification.data;
+    const amountPaid = paymentData.amount / 100;
+
+    // Calculate tokens
+    let tokens = 0;
+    if (type === 'topup') {
+      tokens = amountPaid * 0.00001;
+    } else if (type === 'advert') {
+      tokens = metadata?.advertTokens || 0.00001;
+    }
+
+    // Create transaction
+    const transactionData = {
+      user_id: userId,
+      type: type,
+      amount: tokens,
+      date: new Date().toISOString(),
+      description: type === 'topup' ? `Account Top-up` : `Advert Payment`,
+      status: 'completed',
+      payment_reference: reference,
+      payment_data: paymentData,
+      currency: paymentData.currency,
+      amount_paid: amountPaid,
+      metadata: metadata || {}
+    };
+
+    const { data: transaction, error } = await supabase
+      .from('transactions')
+      .insert(transactionData)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Update balance
+    await supabase.rpc('update_user_balance', {
+      user_id: userId,
+      amount: tokens,
+      balance_type: type === 'topup' ? 'topup' : 'earnings'
+    });
+
+    res.json({
+      success: true,
+      message: 'Payment verified and processed',
+      tokens: tokens,
+      transaction: transaction
+    });
+
+  } catch (error) {
+    console.error('API error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+}
