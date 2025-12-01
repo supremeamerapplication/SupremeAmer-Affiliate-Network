@@ -1,23 +1,49 @@
 {
-  "name": "supremeamer-affiliate",
+  "name": "supremeamer",
   "version": "1.0.0",
-  "description": "SupremeAmer Affiliate Network API",
+  "description": "SupremeAmer Affiliate Network Platform",
   "main": "api/index.js",
   "scripts": {
-    "dev": "vercel dev",
     "start": "node api/index.js",
-    "deploy": "vercel --prod",
-    "build": "echo 'No build step required'"
+    "dev": "nodemon api/index.js",
+    "build": "echo 'Build completed'",
+    "test": "echo 'No tests specified'",
+    "deploy": "vercel --prod"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "cors": "^2.8.5",
     "axios": "^1.6.2",
-    "@supabase/supabase-js": "^2.38.4",
-    "dotenv": "^16.3.1"
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "@supabase/supabase-js": "^2.39.0",
+    "crypto": "^1.0.1",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.33.1",
+    "node-cron": "^3.0.3",
+    "winston": "^3.11.0",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.5",
+    "compression": "^1.7.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "vercel": "^33.0.1"
   },
   "engines": {
-    "node": "18.x"
+    "node": ">=18.0.0"
   },
-  "license": "MIT"
+  "keywords": [
+    "affiliate",
+    "marketing",
+    "crypto",
+    "payments",
+    "supabase",
+    "paystack"
+  ],
+  "author": "SupremeAmer",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/supremeamer.git"
+  }
 }
