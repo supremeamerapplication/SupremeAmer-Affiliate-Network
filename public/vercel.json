@@ -1,27 +1,50 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/index.js",
-      "use": "@vercel/node",
-      "config": {
-        "maxLambdaSize": "15mb"
-      }
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 30
+    },
+    "api/verify-payment.js": {
+      "maxDuration": 30
+    },
+    "api/verify-proof.js": {
+      "maxDuration": 30
+    },
+    "api/withdraw.js": {
+      "maxDuration": 30
+    },
+    "api/webhook/paystack.js": {
+      "maxDuration": 30
+    },
+    "api/health.js": {
+      "maxDuration": 10
     }
-  ],
-  "routes": [
+  },
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/index.js"
+      "source": "/api/verify-payment",
+      "destination": "/api/verify-payment.js"
     },
     {
-      "src": "/(.*)",
-      "dest": "/api/index.js"
+      "source": "/api/verify-proof",
+      "destination": "/api/verify-proof.js"
+    },
+    {
+      "source": "/api/withdraw",
+      "destination": "/api/withdraw.js"
+    },
+    {
+      "source": "/api/webhook/paystack",
+      "destination": "/api/webhook/paystack.js"
+    },
+    {
+      "source": "/api/health",
+      "destination": "/api/health.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
-  "env": {
-    "NODE_ENV": "production"
-  },
   "headers": [
     {
       "source": "/(.*)",
@@ -37,10 +60,6 @@
         {
           "key": "X-XSS-Protection",
           "value": "1; mode=block"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
         }
       ]
     }
