@@ -1,4 +1,4 @@
-// api/index.js - Vercel Serverless Function Entry Point
+// file: api/index.js - Vercel Serverless Function Entry Point
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -348,6 +348,141 @@ app.post('/api/verify-proof', async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Proof verification failed'
+        });
+    }
+});
+
+// Withdrawal endpoint
+app.post('/api/withdraw', async (req, res) => {
+    try {
+        const { userId, email, amount, amountFiat, currency, method, details } = req.body;
+
+        if (!userId || !email || !amount || !amountFiat || !method) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required fields'
+            });
+        }
+
+        // Check user balance
+        const balance = await getUserBalance(userId);
+        
+        if (amount > balance.earnings) {
+            return res.status(400).json({
+                success: false,
+                message: 'Insufficient earnings balance'
+            });
+        }
+
+        // Create withdrawal record
+        const withdrawalData = {
+            user_id: userId,
+            user_email: email,
+            amount: amount,
+            amount_fiat: amountFiat,
+            currency: currency,
+            method: method,
+            details: details,
+            status: 'pending',
+            requested_at: new Date().toISOString()
+        };
+
+        const { data: withdrawal, error } = await supabase
+            .from('withdrawals')
+            .insert(withdrawalData)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        // Create debit transaction
+        await supabase
+            .from('transactions')
+            .insert({
+                user_id: userId,
+                type: 'withdrawal',
+                amount: -amount,
+                date: new Date().toISOString(),
+                description: `Withdrawal request (${method}) - ${currency} ${amountFiat}`,
+                status: 'pending',
+                withdrawal_id: withdrawal.id
+            });
+
+        // Initiate Paystack transfer
+        let transferResponse;
+        try {
+            const recipientData = {
+                type: method === 'bank' ? 'nuban' : 'mobile_money',
+                name: details.accountName || details.name || email,
+                account_number: details.accountNumber || details.number,
+                bank_code: method === 'bank' ? details.bankCode : null,
+                currency: currency === 'NGN' ? 'NGN' : 'USD'
+            };
+
+            const recipientRes = await axios.post(
+                `${PAYSTACK_BASE_URL}/transferrecipient`,
+                recipientData,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            const transferData = {
+                source: 'balance',
+                amount: Math.round(amountFiat * 100),
+                recipient: recipientRes.data.data.recipient_code,
+                reason: `SupremeAmer Withdrawal - ${withdrawal.id}`
+            };
+
+            transferResponse = await axios.post(
+                `${PAYSTACK_BASE_URL}/transfer`,
+                transferData,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            // Update withdrawal with transfer details
+            await supabase
+                .from('withdrawals')
+                .update({
+                    transfer_code: transferResponse.data.data.transfer_code,
+                    transfer_data: transferResponse.data.data,
+                    status: 'processing'
+                })
+                .eq('id', withdrawal.id);
+
+        } catch (transferError) {
+            console.error('Transfer initiation error:', transferError.response?.data || transferError.message);
+            
+            // Mark as manual processing required
+            await supabase
+                .from('withdrawals')
+                .update({
+                    status: 'manual_review',
+                    notes: `Automatic transfer failed: ${transferError.message}`
+                })
+                .eq('id', withdrawal.id);
+        }
+
+        res.json({
+            success: true,
+            message: 'Withdrawal request submitted successfully',
+            withdrawalId: withdrawal.id,
+            status: 'pending'
+        });
+
+    } catch (error) {
+        console.error('Withdrawal error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Withdrawal processing failed'
         });
     }
 });
