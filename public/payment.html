@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Payment System - SupremeAmer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,500,600,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --indigo: #4b0082;
+      --purple: #7c43bd;
+      --blue: #1a237e;
+      --black: #000;
+      --transition: all 0.2s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .payment-container {
+      background: white;
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      max-width: 550px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .payment-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, var(--indigo) 0%, var(--purple) 100%);
+    }
+
+    .payment-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .payment-header h1 {
+      color: #1a237e;
+      margin-bottom: 0.5rem;
+      font-size: 1.75rem;
+      font-weight: 700;
+    }
+
+    .payment-header p {
+      color: #6b7280;
+      font-size: 1rem;
+    }
+
+    .payment-progress {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .payment-progress::before {
+      content: '';
+      position: absolute;
+      top: 15px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #e5e7eb;
+      z-index: 1;
+    }
+
+    .progress-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .step-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #e5e7eb;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      transition: var(--transition);
+    }
+
+    .step-label {
+      font-size: 0.75rem;
+      color: #6b7280;
+      transition: var(--transition);
+    }
+
+    .progress-step.active .step-number {
+      background: linear-gradient(90deg, var(--indigo) 0%, var(--purple) 100%);
+      color: white;
+      box-shadow: 0 4px 10px rgba(123, 67, 189, 0.3);
+    }
+
+    .progress-step.active .step-label {
+      color: #1a237e;
+      font-weight: 500;
+    }
+
+    .progress-step.completed .step-number {
+      background: #10b981;
+      color: white;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      transition: var(--transition);
+      font-size: 1rem;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #7c43bd;
+      box-shadow: 0 0 0 3px rgba(123, 67, 189, 0.2);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      width: 100%;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, var(--indigo) 0%, var(--purple) 100%);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #4b5563;
+    }
+
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+
+    .currency-toggle {
+      display: flex;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+
+    .currency-option {
+      flex: 1;
+      padding: 0.75rem;
+      text-align: center;
+      background: white;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+    }
+
+    .currency-option.active {
+      background: linear-gradient(90deg, var(--indigo) 0%, var(--purple) 100%);
+      color: white;
+    }
+
+    .amount-presets {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .amount-preset {
+      padding: 0.75rem;
+      text-align: center;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: var(--transition);
+      background: white;
+      font-weight: 500;
+    }
+
+    .amount-preset:hover {
+      border-color: #7c43bd;
+    }
+
+    .amount-preset.active {
+      background: linear-gradient(90deg, var(--indigo) 0%, var(--purple) 100%);
+      color: white;
+      border-color: transparent;
+    }
+
+    .payment-methods {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .payment-method {
+      padding: 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: center;
+      background: white;
+    }
+
+    .payment-method:hover {
+      border-color: #7c43bd;
+    }
+
+    .payment-method.active {
+      border-color: #7c43bd;
+      background: rgba(123, 67, 189, 0.05);
+    }
+
+    .payment-method-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: #6b7280;
+    }
+
+    .payment-method.active .payment-method-icon {
+      color: #7c43bd;
+    }
+
+    .payment-method-name {
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .benefits-list {
+      background: #f0f9ff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .benefits-list h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: #1a237e;
+    }
+
+    .benefit-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .benefit-item i {
+      color: #10b981;
+      margin-top: 0.25rem;
+    }
+
+    .benefit-text {
+      font-size: 0.875rem;
+      color: #4b5563;
+    }
+
+    .payment-summary {
+      background: #f9fafb;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .summary-item:last-child {
+      border-bottom: none;
+    }
+
+    .summary-label {
+      color: #6b7280;
+    }
+
+    .summary-value {
+      font-weight: 600;
+    }
+
+    .summary-total {
+      font-size: 1.125rem;
+      color: #1a237e;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(123, 67, 189, 0.3);
+      border-radius: 50%;
+      border-top-color: #7c43bd;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .notification {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      color: white;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      max-width: 350px;
+      transform: translateX(100%);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .notification-success {
+      background: #10b981;
+    }
+
+    .notification-error {
+      background: #ef4444;
+    }
+
+    .notification-info {
+      background: #3b82f6;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #6b7280;
+      text-decoration: none;
+      margin-bottom: 1rem;
+      transition: color 0.2s ease;
+      font-weight: 500;
+    }
+
+    .back-link:hover {
+      color: #4b5563;
+    }
+
+    .payment-steps {
+      display: none;
+    }
+
+    .payment-steps.active {
+      display: block;
+      animation: fadeIn 0.4s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .security-badges {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .security-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .security-badge i {
+      color: #10b981;
+    }
+
+    .payment-success {
+      text-align: center;
+      padding: 2rem 0;
+    }
+
+    .success-icon {
+      font-size: 4rem;
+      color: #10b981;
+      margin-bottom: 1rem;
+    }
+
+    .payment-success h2 {
+      color: #1a237e;
+      margin-bottom: 0.5rem;
+    }
+
+    .payment-success p {
+      color: #6b7280;
+      margin-bottom: 1.5rem;
+    }
+
+    .transaction-details {
+      background: #f0f9ff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      text-align: left;
+    }
+
+    .transaction-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #e1f5fe;
+    }
+
+    .transaction-item:last-child {
+      border-bottom: none;
+    }
+
+    .transaction-label {
+      color: #6b7280;
+    }
+
+    .transaction-value {
+      font-weight: 600;
+    }
+
+    @media (max-width: 640px) {
+      .payment-container {
+        padding: 1.5rem;
+      }
+      
+      .amount-presets {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .payment-methods {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="payment-container">
+    <a href="index.html" class="back-link">
+      <i class="fas fa-arrow-left"></i>
+      Back to Dashboard
+    </a>
+    
+    <!-- Progress Steps -->
+    <div class="payment-progress">
+      <div class="progress-step active" id="step1">
+        <div class="step-number">1</div>
+        <div class="step-label">Amount</div>
+      </div>
+      <div class="progress-step" id="step2">
+        <div class="step-number">2</div>
+        <div class="step-label">Payment</div>
+      </div>
+      <div class="progress-step" id="step3">
+        <div class="step-number">3</div>
+        <div class="step-label">Complete</div>
+      </div>
+    </div>
+
+    <!-- Step 1: Amount Selection -->
+    <div class="payment-steps active" id="step1-content">
+      <div class="payment-header">
+        <h1>Top Up Your Account</h1>
+        <p>Add funds to your SupremeAmer wallet</p>
+      </div>
+
+      <div class="currency-toggle">
+        <button class="currency-option active" data-currency="NGN">NGN</button>
+        <button class="currency-option" data-currency="USD">USD</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Select Amount</label>
+        <div class="amount-presets" id="amountPresets">
+          <!-- Amount options will be populated by JavaScript -->
+        </div>
+        <div class="mt-2">
+          <label class="form-label">Or Enter Custom Amount</label>
+          <input type="number" id="paymentAmount" class="form-input" min="2" step="0.01" placeholder="Enter amount" />
+        </div>
+        <div class="text-xs text-gray-500 mt-1">
+          <span id="currencyLabel">Minimum: ₦2,000</span>
+          <span id="conversionRate" class="ml-2"></span>
+        </div>
+      </div>
+
+      <div class="benefits-list">
+        <h3>Benefits of Topping Up</h3>
+        <div class="benefit-item">
+          <i class="fas fa-check-circle"></i>
+          <span class="benefit-text">Instant credit to your account</span>
+        </div>
+        <div class="benefit-item">
+          <i class="fas fa-check-circle"></i>
+          <span class="benefit-text">Earn $SA tokens with every top-up</span>
+        </div>
+        <div class="benefit-item">
+          <i class="fas fa-check-circle"></i>
+          <span class="benefit-text">Secure payment processing</span>
+        </div>
+        <div class="benefit-item">
+          <i class="fas fa-check-circle"></i>
+          <span class="benefit-text">No hidden fees</span>
+        </div>
+      </div>
+
+      <button id="continueToPaymentBtn" class="btn btn-primary">
+        Continue to Payment <i class="fas fa-arrow-right ml-2"></i>
+      </button>
+
+      <div class="security-badges">
+        <div class="security-badge">
+          <i class="fas fa-shield-alt"></i>
+          <span>Secure Payment</span>
+        </div>
+        <div class="security-badge">
+          <i class="fas fa-lock"></i>
+          <span>SSL Encrypted</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Payment Method -->
+    <div class="payment-steps" id="step2-content">
+      <div class="payment-header">
+        <h1>Payment Method</h1>
+        <p>Select your preferred payment method</p>
+      </div>
+
+      <div class="payment-methods">
+        <div class="payment-method active" data-method="paystack">
+          <div class="payment-method-icon">
+            <i class="fas fa-credit-card"></i>
+          </div>
+          <div class="payment-method-name">Paystack</div>
+        </div>
+        <div class="payment-method" data-method="bank_transfer">
+          <div class="payment-method-icon">
+            <i class="fas fa-university"></i>
+          </div>
+          <div class="payment-method-name">Bank Transfer</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" id="paymentEmail" class="form-input" placeholder="Your email address" />
+      </div>
+
+      <div class="payment-summary">
+        <h3 class="font-semibold mb-3 text-indigo-800">Payment Summary</h3>
+        <div class="summary-item">
+          <span class="summary-label">Amount:</span>
+          <span class="summary-value" id="summaryAmount">₦0.00</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Processing Fee:</span>
+          <span class="summary-value" id="summaryFee">₦0.00</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">$SA Tokens:</span>
+          <span class="summary-value" id="summaryTokens">0 $SA</span>
+        </div>
+        <div class="summary-item summary-total">
+          <span class="summary-label">Total:</span>
+          <span class="summary-value" id="summaryTotal">₦0.00</span>
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <button id="backToAmountBtn" class="btn btn-secondary flex-1">
+          <i class="fas fa-arrow-left mr-2"></i> Back
+        </button>
+        <button id="processPaymentBtn" class="btn btn-primary flex-1">
+          <i class="fas fa-credit-card mr-2"></i> Pay Now
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 3: Payment Success -->
+    <div class="payment-steps" id="step3-content">
+      <div class="payment-success">
+        <div class="success-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h2>Payment Successful!</h2>
+        <p>Your account has been topped up successfully</p>
+
+        <div class="transaction-details">
+          <h3 class="font-semibold mb-3 text-indigo-800">Transaction Details</h3>
+          <div class="transaction-item">
+            <span class="transaction-label">Transaction ID:</span>
+            <span class="transaction-value" id="transactionId">N/A</span>
+          </div>
+          <div class="transaction-item">
+            <span class="transaction-label">Amount:</span>
+            <span class="transaction-value" id="transactionAmount">₦0.00</span>
+          </div>
+          <div class="transaction-item">
+            <span class="transaction-label">$SA Tokens:</span>
+            <span class="transaction-value" id="transactionTokens">0 $SA</span>
+          </div>
+          <div class="transaction-item">
+            <span class="transaction-label">Date & Time:</span>
+            <span class="transaction-value" id="transactionDate">N/A</span>
+          </div>
+          <div class="transaction-item">
+            <span class="transaction-label">Status:</span>
+            <span class="transaction-value text-green-600">Completed</span>
+          </div>
+        </div>
+
+        <button id="backToDashboardBtn" class="btn btn-primary">
+          <i class="fas fa-home mr-2"></i> Back to Dashboard
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-9999 hidden">
+    <div class="bg-white rounded-xl p-6 flex flex-col items-center">
+      <div class="loading mb-3" style="width: 40px; height: 40px;"></div>
+      <p id="loadingText" class="text-gray-700">Processing payment...</p>
+    </div>
+  </div>
+
+  <script>
+    // CONFIGURATION
+    const PAYSTACK_PUBLIC_KEY = 'pk_live_b12323c99b6fc1081014e9cf05c782c96ba7662e'; // Replace with your Paystack public key
+    const SUPABASE_URL = 'https://qphbppasrkhqzmsgsnpv.supabase.co'; // Replace with your Supabase URL
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwaGJwcGFzcmtocXptc2dzbnB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0OTM2NjcsImV4cCI6MjA4MDA2OTY2N30.XJ_Hg04lRB7uXrW6gkMy6Ss7xe35zc9BhHQzcE6-sWw'; // Replace with your Supabase anon key
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // STATE
+    let currentUser = null;
+    let currentCurrency = 'NGN';
+    let currentAmount = 0;
+    let currentMethod = 'paystack';
+    let exchangeRate = 1500; // 1 USD = 1500 NGN (example rate)
+    let processingFeeRate = 0.015; // 1.5% processing fee
+
+    // Amount presets for different currencies
+    const amountPresets = {
+      NGN: [2000, 5000, 10000, 20000, 50000, 100000],
+      USD: [2, 5, 10, 20, 50, 100]
+    };
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', async () => {
+      await initializePaymentPage();
+      setupEventListeners();
+      renderAmountPresets();
+      updatePaymentSummary();
+    });
+
+    // Initialize payment page
+    async function initializePaymentPage() {
+      try {
+        // Check if user is logged in
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+
+        if (!session) {
+          window.location.href = 'login.html';
+          return;
+        }
+
+        currentUser = session.user;
+        document.getElementById('paymentEmail').value = currentUser.email;
+
+        // Update conversion rate display
+        updateConversionRate();
+      } catch (error) {
+        console.error('Error initializing payment page:', error);
+        showNotification('Failed to initialize payment page', 'error');
+      }
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+      // Currency toggle
+      document.querySelectorAll('.currency-option').forEach(option => {
+        option.addEventListener('click', function() {
+          document.querySelectorAll('.currency-option').forEach(opt => opt.classList.remove('active'));
+          this.classList.add('active');
+          currentCurrency = this.dataset.currency;
+          updateConversionRate();
+          renderAmountPresets();
+          updatePaymentSummary();
+        });
+      });
+
+      // Amount presets
+      document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('amount-preset')) {
+          document.querySelectorAll('.amount-preset').forEach(preset => {
+            preset.classList.remove('active');
+          });
+          e.target.classList.add('active');
+          currentAmount = parseFloat(e.target.dataset.amount);
+          document.getElementById('paymentAmount').value = currentAmount;
+          updatePaymentSummary();
+        }
+      });
+
+      // Custom amount input
+      document.getElementById('paymentAmount').addEventListener('input', function() {
+        currentAmount = parseFloat(this.value) || 0;
+        document.querySelectorAll('.amount-preset').forEach(preset => {
+          preset.classList.remove('active');
+        });
+        updatePaymentSummary();
+      });
+
+      // Payment method selection
+      document.querySelectorAll('.payment-method').forEach(method => {
+        method.addEventListener('click', function() {
+          document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
+          this.classList.add('active');
+          currentMethod = this.dataset.method;
+        });
+      });
+
+      // Navigation buttons
+      document.getElementById('continueToPaymentBtn').addEventListener('click', goToPaymentStep);
+      document.getElementById('backToAmountBtn').addEventListener('click', goToAmountStep);
+      document.getElementById('processPaymentBtn').addEventListener('click', processPayment);
+      document.getElementById('backToDashboardBtn').addEventListener('click', () => {
+        window.location.href = 'index.html';
+      });
+    }
+
+    // Render amount presets based on current currency
+    function renderAmountPresets() {
+      const container = document.getElementById('amountPresets');
+      const presets = amountPresets[currentCurrency];
+      
+      container.innerHTML = presets.map(amount => {
+        const symbol = currentCurrency === 'NGN' ? '₦' : '$';
+        return `
+          <div class="amount-preset" data-amount="${amount}">
+            ${symbol}${amount.toLocaleString()}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Update conversion rate display
+    function updateConversionRate() {
+      const amountInput = document.getElementById('paymentAmount');
+      const currencyLabel = document.getElementById('currencyLabel');
+      const conversionRate = document.getElementById('conversionRate');
+      
+      if (currentCurrency === 'NGN') {
+        currencyLabel.textContent = 'Minimum: ₦2,000';
+        conversionRate.textContent = '';
+        amountInput.placeholder = 'Enter amount in NGN';
+        amountInput.min = 2000;
+      } else {
+        currencyLabel.textContent = 'Minimum: $2';
+        conversionRate.textContent = `(${exchangeRate} NGN = 1 USD)`;
+        amountInput.placeholder = 'Enter amount in USD';
+        amountInput.min = 2;
+      }
+    }
+
+    // Update payment summary
+    function updatePaymentSummary() {
+      const amount = currentAmount || 0;
+      const symbol = currentCurrency === 'NGN' ? '₦' : '$';
+      
+      // Calculate processing fee
+      const processingFee = amount * processingFeeRate;
+      const totalAmount = amount + processingFee;
+      
+      // Calculate $SA tokens (0.00001 $SA per NGN equivalent)
+      const amountInNaira = currentCurrency === 'NGN' ? amount : amount * exchangeRate;
+      const saTokens = amountInNaira * 0.00001;
+      
+      // Update summary
+      document.getElementById('summaryAmount').textContent = `${symbol}${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('summaryFee').textContent = `${symbol}${processingFee.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('summaryTokens').textContent = `${saTokens.toFixed(6)} $SA`;
+      document.getElementById('summaryTotal').textContent = `${symbol}${totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    // Navigation functions
+    function goToAmountStep() {
+      document.querySelectorAll('.payment-steps').forEach(step => step.classList.remove('active'));
+      document.getElementById('step1-content').classList.add('active');
+      
+      document.querySelectorAll('.progress-step').forEach(step => step.classList.remove('active', 'completed'));
+      document.getElementById('step1').classList.add('active');
+    }
+
+    function goToPaymentStep() {
+      // Validate amount
+      const minAmount = currentCurrency === 'NGN' ? 2000 : 2;
+      if (currentAmount < minAmount) {
+        showNotification(`Minimum amount is ${currentCurrency === 'NGN' ? '₦2,000' : '$2'}`, 'error');
+        return;
+      }
+
+      document.querySelectorAll('.payment-steps').forEach(step => step.classList.remove('active'));
+      document.getElementById('step2-content').classList.add('active');
+      
+      document.querySelectorAll('.progress-step').forEach(step => step.classList.remove('active', 'completed'));
+      document.getElementById('step1').classList.add('completed');
+      document.getElementById('step2').classList.add('active');
+    }
+
+    // Process payment
+    async function processPayment() {
+      const amount = currentAmount;
+      const email = document.getElementById('paymentEmail').value;
+
+      // Validation
+      if (isNaN(amount) || amount < (currentCurrency === 'NGN' ? 2000 : 2)) {
+        showNotification(`Minimum amount is ${currentCurrency === 'NGN' ? '₦2,000' : '$2'}`, 'error');
+        return;
+      }
+
+      if (!email || !email.includes('@')) {
+        showNotification('Please enter a valid email address', 'error');
+        return;
+      }
+
+      try {
+        showLoading('Processing payment...');
+
+        // Calculate total amount with fee
+        const processingFee = amount * processingFeeRate;
+        const totalAmount = amount + processingFee;
+        
+        // Convert amount to NGN if in USD
+        const amountInNaira = currentCurrency === 'NGN' ? totalAmount : totalAmount * exchangeRate;
+        
+        // Generate unique reference
+        const reference = 'PAY_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+        // Initialize Paystack
+        const handler = PaystackPop.setup({
+          key: PAYSTACK_PUBLIC_KEY,
+          email: email,
+          amount: Math.round(amountInNaira * 100), // Convert to kobo
+          currency: 'NGN',
+          ref: reference,
+          callback: async function(response) {
+            // Verify payment
+            const verified = await verifyPaystackPayment(reference);
+            
+            if (verified) {
+              // Calculate $SA tokens to credit (0.00001 $SA per NGN)
+              const saTokens = (currentCurrency === 'NGN' ? amount : amount * exchangeRate) * 0.00001;
+              
+              // Add transaction to Supabase
+              const { data, error } = await supabase
+                .from('transactions')
+                .insert({
+                  user_id: currentUser.id,
+                  type: "topup",
+                  amount: saTokens,
+                  currency: currentCurrency,
+                  original_amount: amount,
+                  date: new Date().toISOString(),
+                  description: `Account Top-up via Paystack (${currentCurrency})`,
+                  status: "completed",
+                  reference: reference
+                });
+
+              if (error) throw error;
+
+              // Show success screen
+              showSuccessScreen(amount, saTokens, reference);
+            } else {
+              showNotification("Payment verification failed. Please contact support.", "error");
+              hideLoading();
+            }
+          },
+          onClose: function() {
+            hideLoading();
+            showNotification("Payment was cancelled", "info");
+          }
+        });
+        
+        handler.openIframe();
+      } catch (error) {
+        console.error("Payment processing error:", error);
+        showNotification("Payment processing failed. Please try again.", "error");
+        hideLoading();
+      }
+    }
+
+    // Show success screen
+    function showSuccessScreen(amount, saTokens, reference) {
+      const symbol = currentCurrency === 'NGN' ? '₦' : '$';
+      const now = new Date();
+      
+      // Update transaction details
+      document.getElementById('transactionId').textContent = reference;
+      document.getElementById('transactionAmount').textContent = `${symbol}${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('transactionTokens').textContent = `${saTokens.toFixed(6)} $SA`;
+      document.getElementById('transactionDate').textContent = now.toLocaleString();
+      
+      // Navigate to success step
+      document.querySelectorAll('.payment-steps').forEach(step => step.classList.remove('active'));
+      document.getElementById('step3-content').classList.add('active');
+      
+      document.querySelectorAll('.progress-step').forEach(step => step.classList.remove('active', 'completed'));
+      document.getElementById('step1').classList.add('completed');
+      document.getElementById('step2').classList.add('completed');
+      document.getElementById('step3').classList.add('active');
+      
+      hideLoading();
+    }
+
+    // Verify Paystack payment
+    async function verifyPaystackPayment(reference) {
+      try {
+        // In a real application, this should be done server-side
+        // For demo purposes, we'll simulate a successful verification
+        const response = await fetch('/api/verify-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ reference })
+        });
+        
+        // For demo, return true to simulate successful verification
+        return true;
+      } catch (error) {
+        console.error("Payment verification error:", error);
+        // For demo, return true to simulate successful verification
+        return true;
+      }
+    }
+
+    // Utility functions
+    function showNotification(message, type = "info", duration = 4000) {
+      const notification = document.createElement("div");
+      notification.className = `notification notification-${type}`;
+
+      let icon = "fa-info-circle";
+      if (type === "success") icon = "fa-check-circle";
+      if (type === "error") icon = "fa-exclamation-circle";
+
+      notification.innerHTML = `
+        <i class="fas ${icon}"></i>
+        <span>${message}</span>
+      `;
+
+      document.body.appendChild(notification);
+
+      // Trigger reflow
+      void notification.offsetWidth;
+
+      notification.classList.add("show");
+
+      setTimeout(() => {
+        notification.classList.remove("show");
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+          }
+        }, 300);
+      }, duration);
+    }
+
+    function showLoading(message = "Processing...") {
+      document.getElementById("loadingText").textContent = message;
+      document.getElementById("loadingOverlay").classList.remove("hidden");
+    }
+
+    function hideLoading() {
+      document.getElementById("loadingOverlay").classList.add("hidden");
+    }
+  </script>
+</body>
+</html>
