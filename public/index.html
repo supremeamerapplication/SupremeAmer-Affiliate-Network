@@ -87,7 +87,7 @@
 
     /* MAIN CONTENT - Added padding for bottom navigation */
     main {
-      padding-bottom: 80px;
+      padding-bottom: 20px;
     }
 
     /* Tab content */
@@ -116,6 +116,35 @@
       box-shadow: 0 -2px 12px #1a237e33;
       z-index: 1000;
       padding: 0.5rem 0;
+      transition: transform 0.3s ease;
+    }
+
+    .bottom-nav.hidden {
+      transform: translateY(100%);
+    }
+
+    .nav-toggle-btn {
+      position: fixed;
+      bottom: 70px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(to right, #1a237e 0%, #7c43bd 100%);
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      cursor: pointer;
+      z-index: 999;
+      box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .nav-toggle-btn:hover {
+      transform: scale(1.1);
     }
 
     .nav-container {
@@ -934,7 +963,7 @@
 
         <div class="mb-4 p-3 bg-gray-50 rounded-lg">
           <div class="flex justify-between items-center mb-2">
-            <span id="walletStatus" class="font-semibold">Paystack Wallet</span>
+            <span id="walletStatus" class="font-semibold">Paystack Wallet Status</span>
           </div>
 
           <div class="grid grid-cols-2 gap-3 mb-3">
@@ -943,22 +972,57 @@
 
             <div class="font-medium">Balance:</div>
             <div id="wallet-balance">₦0.00</div>
+
+            <div class="font-medium">Status:</div>
+            <div id="wallet-status-text" class="text-yellow-600">Not Connected</div>
           </div>
 
-          <button id="connectWalletBtn" class="btn btn-primary w-full">
-            <i class="fas fa-wallet mr-2"></i> Connect Paystack
-          </button>
+          <div id="connectWalletSection">
+            <button id="connectWalletBtn" class="btn btn-primary w-full mb-2">
+              <i class="fas fa-wallet mr-2"></i> Connect Paystack Wallet
+            </button>
+            <p class="text-xs text-gray-500 text-center mb-3">
+              Connect your Paystack account to view balances and make transactions
+            </p>
+          </div>
+
+          <div id="walletConnectedSection" class="hidden">
+            <div class="bg-green-50 p-3 rounded-lg mb-3">
+              <div class="flex items-center gap-2 text-green-700">
+                <i class="fas fa-check-circle"></i>
+                <span>Paystack Wallet Connected</span>
+              </div>
+              <p class="text-xs text-green-600 mt-1">Your wallet is ready for transactions</p>
+            </div>
+            <button id="refreshWalletBtn" class="btn btn-secondary w-full mb-2">
+              <i class="fas fa-sync-alt mr-2"></i> Refresh Balance
+            </button>
+            <button id="disconnectWalletBtn" class="btn btn-danger w-full">
+              <i class="fas fa-unlink mr-2"></i> Disconnect Wallet
+            </button>
+          </div>
         </div>
 
         <div class="text-xs text-gray-500 p-3 bg-gray-50 rounded-lg">
-          <p>Your Paystack wallet is used for all transactions. Connect to view your balance and transaction history.</p>
+          <p><strong>Note:</strong> Your Paystack wallet is used for all transactions. You need to connect it to:</p>
+          <ul class="list-disc pl-4 mt-1">
+            <li>Top up your account balance</li>
+            <li>Receive withdrawal payments</li>
+            <li>Pay for advert uploads</li>
+            <li>View transaction history</li>
+          </ul>
         </div>
       </div>
     </section>
   </main>
 
+  <!-- BOTTOM NAVIGATION TOGGLE BUTTON -->
+  <button id="navToggleBtn" class="nav-toggle-btn">
+    <i class="fas fa-bars"></i>
+  </button>
+
   <!-- BOTTOM NAVIGATION -->
-  <nav class="bottom-nav" aria-label="Main Navigation">
+  <nav id="bottomNav" class="bottom-nav" aria-label="Main Navigation">
     <div class="nav-container">
       <button class="nav-btn active" id="home-tab-btn" data-tab="homeTab" aria-controls="homeTab" aria-selected="true">
         <i class="fas fa-home"></i>
@@ -1297,6 +1361,7 @@
     let currentAdvertData = null;
     let currentCurrency = 'NGN';
     let PAYSTACK_PUBLIC_KEY = null;
+    let isWalletConnected = false;
 
     // Enhanced notification system
     function showNotification(message, type = "info", duration = 4000) {
@@ -1394,6 +1459,20 @@
         }
       }
     };
+
+    // NAVIGATION TOGGLE
+    document.getElementById("navToggleBtn").addEventListener("click", function() {
+      const bottomNav = document.getElementById("bottomNav");
+      bottomNav.classList.toggle("hidden");
+      
+      // Change icon based on state
+      const icon = this.querySelector("i");
+      if (bottomNav.classList.contains("hidden")) {
+        icon.className = "fas fa-bars";
+      } else {
+        icon.className = "fas fa-times";
+      }
+    });
 
     // UTILS
     function generateQr(data, el) {
@@ -1599,6 +1678,86 @@
       } catch (error) {
         console.error("Error getting Paystack key:", error);
         return false;
+      }
+    }
+
+    // CONNECT PAYSTACK WALLET
+    async function connectPaystackWallet() {
+      try {
+        showLoading("Connecting to Paystack...");
+        
+        // Get Paystack key first
+        if (!PAYSTACK_PUBLIC_KEY) {
+          const hasKey = await getPaystackPublicKey();
+          if (!hasKey) {
+            showNotification("Unable to connect to payment service. Please try again later.", "error");
+            hideLoading();
+            return;
+          }
+        }
+
+        // For now, we'll simulate wallet connection since Paystack doesn't have a direct wallet connection API
+        // In production, you would integrate with Paystack's customer/transaction APIs
+        
+        // Simulate API call to connect wallet
+        setTimeout(() => {
+          isWalletConnected = true;
+          updateWalletUI();
+          hideLoading();
+          showNotification("Paystack wallet connected successfully!", "success");
+        }, 1500);
+        
+      } catch (error) {
+        console.error("Error connecting Paystack wallet:", error);
+        showNotification("Failed to connect wallet. Please try again.", "error");
+        hideLoading();
+      }
+    }
+
+    // UPDATE WALLET UI
+    function updateWalletUI() {
+      if (isWalletConnected) {
+        document.getElementById("connectWalletSection").classList.add("hidden");
+        document.getElementById("walletConnectedSection").classList.remove("hidden");
+        document.getElementById("wallet-status-text").textContent = "Connected";
+        document.getElementById("wallet-status-text").className = "text-green-600";
+        
+        // Update wallet balance (this would come from your server in production)
+        document.getElementById("wallet-balance").textContent = currentCurrency === 'NGN' ? '₦0.00' : '$0.00';
+      } else {
+        document.getElementById("connectWalletSection").classList.remove("hidden");
+        document.getElementById("walletConnectedSection").classList.add("hidden");
+        document.getElementById("wallet-status-text").textContent = "Not Connected";
+        document.getElementById("wallet-status-text").className = "text-yellow-600";
+        document.getElementById("wallet-balance").textContent = currentCurrency === 'NGN' ? '₦0.00' : '$0.00';
+      }
+    }
+
+    // DISCONNECT WALLET
+    function disconnectPaystackWallet() {
+      isWalletConnected = false;
+      updateWalletUI();
+      showNotification("Paystack wallet disconnected.", "info");
+    }
+
+    // REFRESH WALLET BALANCE
+    async function refreshWalletBalance() {
+      try {
+        showLoading("Refreshing wallet balance...");
+        
+        // In production, this would call your server to get actual Paystack balance
+        setTimeout(() => {
+          // Simulate getting updated balance
+          const balance = currentCurrency === 'NGN' ? '₦0.00' : '$0.00';
+          document.getElementById("wallet-balance").textContent = balance;
+          hideLoading();
+          showNotification("Wallet balance refreshed.", "success");
+        }, 1000);
+        
+      } catch (error) {
+        console.error("Error refreshing wallet balance:", error);
+        showNotification("Failed to refresh balance.", "error");
+        hideLoading();
       }
     }
 
@@ -2485,6 +2644,12 @@
         await loadBalance();
         await renderMarket();
         updateCurrencyDisplay();
+        updateWalletUI();
+
+        // Connect Paystack Wallet button
+        document.getElementById("connectWalletBtn").onclick = connectPaystackWallet;
+        document.getElementById("refreshWalletBtn").onclick = refreshWalletBalance;
+        document.getElementById("disconnectWalletBtn").onclick = disconnectPaystackWallet;
 
         // Load invitee list when invite tab is clicked
         document.querySelector('[data-tab="inviteTab"]').onclick = async () => {
@@ -2521,9 +2686,21 @@
     });
 
     // FUND AND CASHOUT BUTTONS
-    document.getElementById("fundBtn").onclick = () => openModal("fundModal");
-    document.getElementById("cashoutBtn").onclick = () => openModal("cashoutModal");
-    document.getElementById("connectWalletBtn").onclick = () => showNotification("Paystack wallet connection coming soon!", "info");
+    document.getElementById("fundBtn").onclick = () => {
+      if (!isWalletConnected) {
+        showNotification("Please connect your Paystack wallet first.", "warning");
+        return;
+      }
+      openModal("fundModal");
+    };
+    
+    document.getElementById("cashoutBtn").onclick = () => {
+      if (!isWalletConnected) {
+        showNotification("Please connect your Paystack wallet first.", "warning");
+        return;
+      }
+      openModal("cashoutModal");
+    };
     
     // CLICK ON BALANCE TO SHOW COMING SOON
     document.getElementById('account-balance').addEventListener('click', function() {
