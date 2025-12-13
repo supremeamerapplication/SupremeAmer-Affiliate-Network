@@ -650,13 +650,13 @@
         overflow-x: auto;
         justify-content: flex-start;
       }
-      
+
       .nav-btn {
         padding: 0.5rem 0.75rem;
         font-size: 0.75rem;
         min-width: 80px;
       }
-      
+
       .nav-btn i {
         font-size: 1rem;
       }
@@ -713,7 +713,7 @@
       background: #00A859;
       color: white;
     }
-    
+
     .paystack-btn:hover {
       background: #008F4C;
     }
@@ -722,15 +722,15 @@
     .topup-color {
       color: #7c43bd;
     }
-    
+
     .earnings-color {
       color: #16a34a;
     }
-    
+
     .withdrawable-color {
       color: #1a237e;
     }
-    
+
     .pending-color {
       color: #ea580c;
     }
@@ -925,16 +925,16 @@
           Total Account Balance
         </div>
         <div class="main-balance-amount" id="account-balance">$SA 0</div>
-        
+
         <!-- Currency Toggle -->
         <div class="currency-toggle">
           <button class="currency-option active" data-currency="NGN">NGN</button>
           <button class="currency-option" data-currency="USD">USD</button>
           <button class="currency-option" data-currency="SA">$SA</button>
         </div>
-        
+
         <div id="token-value" class="text-white text-sm mb-4">Value: $0.00</div>
-        
+
         <div class="action-buttons">
           <button class="btn btn-primary" id="fundBtn">
             <i class="fas fa-plus-circle mr-2"></i> Top Up
@@ -1186,6 +1186,7 @@
         <div class="mb-4 p-3 bg-gray-50 rounded-lg">
           <div class="flex justify-between items-center mb-2">
             <span id="walletStatus" class="font-semibold">Paystack Wallet</span>
+            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full" id="connection-status">Not Connected</span>
           </div>
 
           <div class="grid grid-cols-2 gap-3 mb-3">
@@ -1196,9 +1197,18 @@
             <div id="wallet-balance">₦0.00</div>
           </div>
 
-          <button id="connectWalletBtn" class="btn btn-primary w-full">
+          <button id="connectWalletBtn" class="btn btn-primary w-full mb-2">
             <i class="fas fa-wallet mr-2"></i> Connect Paystack
           </button>
+          
+          <button id="refreshWalletBtn" class="btn btn-secondary w-full">
+            <i class="fas fa-sync-alt mr-2"></i> Refresh Balance
+          </button>
+        </div>
+
+        <div id="walletTransactions" class="mb-4 hidden">
+          <h3 class="font-semibold mb-2 text-indigo-800">Recent Transactions</h3>
+          <div id="wallet-transactions-list" class="space-y-2"></div>
         </div>
 
         <div class="text-xs text-gray-500 p-3 bg-gray-50 rounded-lg">
@@ -1385,7 +1395,7 @@
         const randomString = Math.random().toString(36).substring(2, 15);
         const safeName = originalFileName.toLowerCase().replace(/[^a-z0-9._-]/g, '_');
         const extension = originalFileName.split('.').pop();
-        
+
         return `${userId}/${timestamp}_${randomString}_${safeName}`;
       }
 
@@ -1625,6 +1635,7 @@
     let currentAdvertData = null;
     let currentCurrency = 'NGN';
     let isWalletConnected = false;
+    let walletBalance = 0;
 
     // Enhanced notification system
     function showNotification(message, type = "info", duration = 4000) {
@@ -1753,10 +1764,13 @@
       // Update wallet display
       document.getElementById('wallet-currency').textContent = currentCurrency;
       
+      // Update wallet balance display
+      updateWalletBalanceDisplay();
+
       // Update fund modal
       const fundAmount = document.getElementById('fundAmount');
       const fundConversion = document.getElementById('fundConversion');
-      
+
       if (currentCurrency === 'NGN') {
         fundAmount.placeholder = 'Min ₦2,000';
         fundAmount.min = 2000;
@@ -1766,7 +1780,7 @@
         fundAmount.min = 2;
         fundConversion.textContent = 'Exchange rate: 1 USD = 0.015 $SA';
       }
-      
+
       // Update balance display
       updateAllBalances();
     }
@@ -1786,21 +1800,21 @@
         let topupBalance = 0;
         let earningsBalance = 0;
         let pendingBalance = 0;
-        
+
         if (txs) {
           txs.forEach(tx => {
             const amount = parseFloat(tx.amount) || 0;
-            
+
             if (tx.type === 'topup') {
               topupBalance += amount;
             } else if (tx.type === 'credit' || tx.type === 'referral' || tx.type === 'daily_reward' || tx.type === 'ad_reward') {
               earningsBalance += amount;
             }
-            
+
             if (tx.status === 'pending') {
               pendingBalance += Math.abs(amount);
             }
-            
+
             totalBalance += amount;
           });
         }
@@ -1824,7 +1838,7 @@
         document.getElementById("earnings-balance").textContent = `$SA ${earningsBalance.toFixed(6)}`;
         document.getElementById("withdrawable-balance").textContent = `$SA ${earningsBalance.toFixed(6)}`;
         document.getElementById("pending-balance").textContent = `$SA ${pendingBalance.toFixed(6)}`;
-        
+
         // Update token values
         updateAllBalances(totalBalance, topupBalance, earningsBalance, pendingBalance);
       } catch (error) {
@@ -1835,13 +1849,13 @@
     // UPDATE ALL BALANCE VALUES
     function updateAllBalances(total = 0, topup = 0, earnings = 0, pending = 0) {
       const tokenValueElement = document.getElementById('token-value');
-      
+
       // Update total value
       const totalValue = total * TOKEN_PRICE;
       if (currentCurrency === 'NGN') {
         const valueInNaira = totalValue * EXCHANGE_RATE;
         tokenValueElement.textContent = `Value: ₦${valueInNaira.toFixed(2)}`;
-        
+
         // Update individual values
         document.getElementById('topup-value').textContent = `₦${(topup * TOKEN_PRICE * EXCHANGE_RATE).toFixed(2)}`;
         document.getElementById('earnings-value').textContent = `₦${(earnings * TOKEN_PRICE * EXCHANGE_RATE).toFixed(2)}`;
@@ -1849,7 +1863,7 @@
         document.getElementById('pending-value').textContent = `₦${(pending * TOKEN_PRICE * EXCHANGE_RATE).toFixed(2)}`;
       } else if (currentCurrency === 'USD') {
         tokenValueElement.textContent = `Value: $${totalValue.toFixed(2)}`;
-        
+
         // Update individual values
         document.getElementById('topup-value').textContent = `$${(topup * TOKEN_PRICE).toFixed(2)}`;
         document.getElementById('earnings-value').textContent = `$${(earnings * TOKEN_PRICE).toFixed(2)}`;
@@ -1857,7 +1871,7 @@
         document.getElementById('pending-value').textContent = `$${(pending * TOKEN_PRICE).toFixed(2)}`;
       } else {
         tokenValueElement.textContent = `Token Price: $${TOKEN_PRICE.toFixed(4)} per SA`;
-        
+
         // Update individual values (in $SA)
         document.getElementById('topup-value').textContent = `$${(topup * TOKEN_PRICE).toFixed(2)}`;
         document.getElementById('earnings-value').textContent = `$${(earnings * TOKEN_PRICE).toFixed(2)}`;
@@ -1875,11 +1889,11 @@
     document.getElementById("ad-clicks").addEventListener("input", function() {
       const category = document.getElementById('ad-category').value;
       const clicks = parseInt(this.value) || 0;
-      
+
       if (clicks >= 500) {
         let cost = 0;
         let costPerUnit = 0;
-        
+
         switch(category) {
           case 'Social Media':
             costPerUnit = 2 / 500; // $2 for 500 clicks
@@ -1897,7 +1911,7 @@
             costPerUnit = 2 / 500; // Default to social media rate
             cost = clicks * costPerUnit;
         }
-        
+
         // Convert to current currency
         if (currentCurrency === 'NGN') {
           cost = cost * EXCHANGE_RATE;
@@ -1919,11 +1933,151 @@
       }
     }
 
+    // REAL PAYSTACK WALLET CONNECTION FUNCTION
+    async function connectPaystackWallet() {
+      try {
+        showLoading("Connecting to Paystack...");
+
+        // Check if Paystack key is available
+        if (!PAYSTACK_PUBLIC_KEY || PAYSTACK_PUBLIC_KEY.includes('YOUR_LIVE_PUBLIC_KEY')) {
+          showNotification("Paystack is not configured properly. Please contact support.", "error");
+          hideLoading();
+          return;
+        }
+
+        // Call backend to create Paystack customer
+        const response = await fetch(`${SERVER_URL}/api/connect-wallet`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: currentUser.email,
+            userId: currentUser.id,
+            name: currentUser.user_metadata?.name || currentUser.email.split('@')[0]
+          })
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to connect wallet');
+        }
+
+        // Store customer ID in Supabase
+        const { error } = await supabase
+          .from('users')
+          .update({ 
+            paystack_customer_id: result.customer_id,
+            wallet_connected: true,
+            wallet_connected_at: new Date().toISOString()
+          })
+          .eq('id', currentUser.id);
+
+        if (error) throw error;
+
+        isWalletConnected = true;
+        await updateWalletUI();
+        await getWalletBalance();
+        
+        showNotification("Paystack wallet connected successfully!", "success");
+
+      } catch (error) {
+        console.error("Error connecting Paystack wallet:", error);
+        showNotification("Failed to connect wallet: " + error.message, "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // GET WALLET BALANCE FROM BACKEND
+    async function getWalletBalance() {
+      try {
+        const response = await fetch(`${SERVER_URL}/api/get-wallet-balance?userId=${currentUser.id}`);
+        const result = await response.json();
+        
+        if (result.success) {
+          isWalletConnected = result.connected;
+          walletBalance = result.wallet_balance || 0;
+          
+          updateWalletUI();
+          updateWalletBalanceDisplay();
+          
+          // Show transactions if any
+          if (result.transactions && result.transactions.length > 0) {
+            renderWalletTransactions(result.transactions);
+          }
+        }
+      } catch (error) {
+        console.error("Error getting wallet balance:", error);
+      }
+    }
+
+    // UPDATE WALLET BALANCE DISPLAY
+    function updateWalletBalanceDisplay() {
+      let displayBalance = '';
+      if (currentCurrency === 'NGN') {
+        displayBalance = `₦${walletBalance.toFixed(2)}`;
+      } else if (currentCurrency === 'USD') {
+        displayBalance = `$${(walletBalance / EXCHANGE_RATE).toFixed(2)}`;
+      } else {
+        displayBalance = `$${walletBalance.toFixed(2)}`;
+      }
+      
+      document.getElementById("wallet-balance").textContent = displayBalance;
+    }
+
+    // RENDER WALLET TRANSACTIONS
+    function renderWalletTransactions(transactions) {
+      const container = document.getElementById('wallet-transactions-list');
+      if (!transactions || transactions.length === 0) {
+        container.innerHTML = '<div class="text-gray-500 text-center py-4">No transactions yet</div>';
+        return;
+      }
+
+      container.innerHTML = transactions.map(tx => `
+        <div class="p-2 border rounded-lg">
+          <div class="flex justify-between items-center">
+            <div class="font-medium">${tx.type}</div>
+            <div class="${tx.amount >= 0 ? 'text-green-600' : 'text-red-600'}">${tx.amount >= 0 ? '+' : ''}${tx.amount}</div>
+          </div>
+          <div class="text-xs text-gray-500">${tx.description || ''}</div>
+          <div class="text-xs text-gray-400">${new Date(tx.created_at).toLocaleDateString()}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('walletTransactions').classList.remove('hidden');
+    }
+
+    // UPDATE WALLET UI
+    function updateWalletUI() {
+      const statusElement = document.getElementById('connection-status');
+      const connectBtn = document.getElementById('connectWalletBtn');
+      
+      if (isWalletConnected) {
+        document.getElementById("walletStatus").textContent = "Paystack Wallet (Connected)";
+        statusElement.textContent = "Connected";
+        statusElement.className = "text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full";
+        connectBtn.innerHTML = '<i class="fas fa-check mr-2"></i> Connected';
+        connectBtn.classList.remove("btn-primary");
+        connectBtn.classList.add("btn-success");
+        connectBtn.disabled = true;
+      } else {
+        document.getElementById("walletStatus").textContent = "Paystack Wallet";
+        statusElement.textContent = "Not Connected";
+        statusElement.className = "text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full";
+        connectBtn.innerHTML = '<i class="fas fa-wallet mr-2"></i> Connect Paystack';
+        connectBtn.classList.remove("btn-success");
+        connectBtn.classList.add("btn-primary");
+        connectBtn.disabled = false;
+      }
+    }
+
     // PAYSTACK PAYMENT FUNCTION FOR FUNDING ACCOUNT
-    async function processPaystackPayment(amount, email, reference, type = 'topup') {
+    async function processPaystackPayment(amount, email, reference, type = 'topup', advertData = null) {
       try {
         showLoading("Processing payment...");
-        
+
         // Initialize Paystack
         const handler = PaystackPop.setup({
           key: PAYSTACK_PUBLIC_KEY,
@@ -1932,28 +2086,43 @@
           currency: 'NGN',
           ref: reference,
           callback: async function(response) {
-            // Verify payment on server
-            const verified = await verifyPaymentOnServer(reference, type);
+            hideLoading();
             
+            // Verify payment on server
+            const verifyData = {
+              reference: response.reference,
+              type: type,
+              userId: currentUser.id,
+              email: currentUser.email
+            };
+            
+            if (type === 'advert' && advertData) {
+              verifyData.advertData = advertData;
+            }
+
+            const verified = await verifyPaymentOnServer(verifyData);
+
             if (verified.success) {
-              showNotification("Payment successful! Funds added to your account.", "success");
-              closeModal("fundModal");
-              await loadBalance();
+              showNotification("Payment successful! " + verified.message, "success");
               
-              // If it's an advert payment, upload the advert
-              if (type === 'advert' && currentAdvertData) {
-                await uploadAdvertAfterPayment(currentAdvertData, reference);
+              if (type === 'topup') {
+                closeModal("fundModal");
+                await loadBalance();
+                await getWalletBalance();
+              } else if (type === 'advert' && verified.payment_id) {
+                // Process advert after payment
+                await processAdvertAfterPayment(verified.payment_id, advertData);
               }
             } else {
               showNotification("Payment verification failed: " + verified.message, "error");
             }
           },
           onClose: function() {
-            showNotification("Payment was cancelled", "warning");
             hideLoading();
+            showNotification("Payment was cancelled", "warning");
           }
         });
-        
+
         handler.openIframe();
       } catch (error) {
         console.error("Paystack payment error:", error);
@@ -1963,23 +2132,18 @@
     }
 
     // VERIFY PAYMENT ON SERVER
-    async function verifyPaymentOnServer(reference, type) {
+    async function verifyPaymentOnServer(data) {
       try {
         const response = await fetch(`${SERVER_URL}/api/verify-payment`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ 
-            reference, 
-            type,
-            userId: currentUser.id,
-            email: currentUser.email
-          })
+          body: JSON.stringify(data)
         });
-        
-        const data = await response.json();
-        return data;
+
+        const result = await response.json();
+        return result;
       } catch (error) {
         console.error("Payment verification error:", error);
         return {
@@ -1989,168 +2153,76 @@
       }
     }
 
-    // UPLOAD ADVERT AFTER PAYMENT
-    async function uploadAdvertAfterPayment(advertData, reference) {
+    // PROCESS ADVERT AFTER PAYMENT
+    async function processAdvertAfterPayment(paymentId, advertData) {
       try {
-        let imageUrl = "";
-        if (advertData.imageFile) {
-          const constraints = storageManager.getUploadConstraints('adImage');
-          const validation = storageManager.validateFile(advertData.imageFile, constraints.allowedTypes, constraints.maxSize);
-          
-          if (!validation.isValid) {
-            showNotification(validation.errors.join(', '), "error");
-            return;
-          }
-          
-          const uploadResult = await storageManager.uploadAdImage(advertData.imageFile, currentUser.id);
-          
-          if (!uploadResult.success) {
-            throw new Error(uploadResult.error);
-          }
-          
-          imageUrl = uploadResult.publicUrl;
-        }
-
-        // Calculate reward per participant
-        let rewardPerParticipant = 0;
-        switch(advertData.category) {
-          case 'Social Media':
-            rewardPerParticipant = 0.0029;
-            break;
-          case 'App Download':
-            rewardPerParticipant = 0.009;
-            break;
-          case 'Website Visit':
-            rewardPerParticipant = 0.0002;
-            break;
-          default:
-            rewardPerParticipant = 0.0029;
-        }
-
-        const rewardInTokens = rewardPerParticipant / TOKEN_PRICE;
-
-        // Create advert in Supabase
-        const { data: advert, error: advertError } = await supabase
-          .from('adverts')
-          .insert({
-            title: advertData.title, 
-            category: advertData.category, 
-            goal: advertData.clicks, 
-            url: advertData.url, 
-            image_url: imageUrl, 
-            instructions: advertData.instructions,
-            poster: currentUser.id, 
-            active: true, 
-            clicks: 0,
-            max_clicks: advertData.clicks,
-            reward_per_participant: rewardInTokens,
-            payment_reference: reference,
-            created_at: new Date().toISOString()
+        showLoading("Creating your advert...");
+        
+        const response = await fetch(`${SERVER_URL}/api/process-advert`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            payment_id: paymentId,
+            userId: currentUser.id,
+            advertData: advertData
           })
-          .select()
-          .single();
+        });
 
-        if (advertError) throw advertError;
+        const result = await response.json();
 
-        // Credit reward for successful upload
-        await supabase
-          .from('transactions')
-          .insert({
-            user_id: currentUser.id,
-            type: "ad_upload",
-            amount: 0.00001,
-            date: new Date().toISOString(),
-            description: "Advert upload reward",
-            status: "completed"
-          });
-
-        showNotification('Advert uploaded successfully! You earned 0.00001 $SA tokens.', "success");
-        await renderMarket();
-      } catch (error) {
-        console.error("Error uploading advert:", error);
-        showNotification("Failed to upload advert: " + error.message, "error");
-      }
-    }
-
-    // FIXED: CONNECT PAYSTACK WALLET FUNCTION
-    async function connectPaystackWallet() {
-      try {
-        showLoading("Connecting to Paystack...");
-        
-        // Check if Paystack key is available
-        if (!PAYSTACK_PUBLIC_KEY || PAYSTACK_PUBLIC_KEY.includes('YOUR_LIVE_PUBLIC_KEY')) {
-          showNotification("Paystack is not configured properly. Please contact support.", "error");
-          hideLoading();
-          return;
+        if (!result.success) {
+          throw new Error(result.message);
         }
 
-        // In a real implementation, you would:
-        // 1. Create a Paystack customer for the user
-        // 2. Store the customer reference in your database
-        // 3. Update the wallet status
+        closeModal("uploadAdvertModal");
+        showNotification("Advert created successfully! You earned 0.00001 $SA tokens.", "success");
         
-        // For now, we'll simulate a successful connection
-        setTimeout(() => {
-          isWalletConnected = true;
-          updateWalletUI();
-          hideLoading();
-          showNotification("Paystack wallet connected successfully!", "success");
-        }, 1500);
+        await loadBalance();
+        await renderMarket();
+        
+        // Reset form
+        document.getElementById('uploadAdvertForm').reset();
+        document.getElementById('ad-cost').textContent = '';
+        document.getElementById('ad-preview').classList.add('hidden');
         
       } catch (error) {
-        console.error("Error connecting Paystack wallet:", error);
-        showNotification("Failed to connect wallet: " + error.message, "error");
+        console.error("Error processing advert:", error);
+        showNotification("Failed to create advert: " + error.message, "error");
+      } finally {
         hideLoading();
-      }
-    }
-
-    // UPDATE WALLET UI
-    function updateWalletUI() {
-      if (isWalletConnected) {
-        document.getElementById("walletStatus").textContent = "Paystack Wallet (Connected)";
-        document.getElementById("wallet-balance").textContent = currentCurrency === 'NGN' ? '₦0.00' : '$0.00';
-        document.getElementById("connectWalletBtn").innerHTML = '<i class="fas fa-check mr-2"></i> Connected';
-        document.getElementById("connectWalletBtn").classList.remove("btn-primary");
-        document.getElementById("connectWalletBtn").classList.add("btn-success");
-        document.getElementById("connectWalletBtn").disabled = true;
-      } else {
-        document.getElementById("walletStatus").textContent = "Paystack Wallet";
-        document.getElementById("wallet-balance").textContent = currentCurrency === 'NGN' ? '₦0.00' : '$0.00';
-        document.getElementById("connectWalletBtn").innerHTML = '<i class="fas fa-wallet mr-2"></i> Connect Paystack';
-        document.getElementById("connectWalletBtn").classList.remove("btn-success");
-        document.getElementById("connectWalletBtn").classList.add("btn-primary");
-        document.getElementById("connectWalletBtn").disabled = false;
       }
     }
 
     // FUND ACCOUNT BUTTON HANDLER
     document.getElementById("proceedToPaymentBtn").onclick = async function() {
       const amount = parseFloat(document.getElementById("fundAmount").value);
-      
+
       if (isNaN(amount) || amount <= 0) {
         showNotification("Please enter a valid amount", "error");
         return;
       }
-      
+
       if (currentCurrency === 'NGN' && amount < 2000) {
         showNotification("Minimum top-up amount is ₦2,000", "error");
         return;
       }
-      
+
       if (currentCurrency === 'USD' && amount < 2) {
         showNotification("Minimum top-up amount is $2", "error");
         return;
       }
-      
+
       // Calculate amount in NGN for Paystack
       let amountInNaira = amount;
       if (currentCurrency === 'USD') {
         amountInNaira = amount * EXCHANGE_RATE;
       }
-      
+
       // Generate reference
       const reference = 'TOPUP_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      
+
       // Process payment
       await processPaystackPayment(amountInNaira, currentUser.email, reference, 'topup');
     };
@@ -2173,16 +2245,16 @@
         showNotification("URL must start with http:// or https://", "error");
         return;
       }
-      
+
       let minClicks = 500;
       if (category === 'App Download') minClicks = 100;
       if (category === 'Website Visit') minClicks = 7000;
-      
+
       if (clicks < minClicks) {
         showNotification(`Minimum ${getUnitName(category)} required: ${minClicks}`, "error");
         return;
       }
-      
+
       if (!instructions.trim()) {
         showNotification("Instructions are required.", "error");
         return;
@@ -2191,7 +2263,7 @@
       // Calculate cost
       let cost = 0;
       let costPerUnit = 0;
-      
+
       switch(category) {
         case 'Social Media':
           costPerUnit = 2 / 500;
@@ -2209,26 +2281,57 @@
           costPerUnit = 2 / 500;
           cost = clicks * costPerUnit;
       }
-      
+
       // Convert to NGN for Paystack
       const costInNaira = cost * EXCHANGE_RATE;
 
-      // Store advert data
-      currentAdvertData = {
+      // Prepare advert data
+      const advertData = {
         title,
         category,
         clicks,
         cost: costInNaira,
         url,
         instructions,
-        imageFile: imageInput.files && imageInput.files[0] ? imageInput.files[0] : null
+        imageUrl: '' // Will be set after image upload if exists
       };
+
+      // Handle image upload if exists
+      if (imageInput.files && imageInput.files[0]) {
+        try {
+          showLoading("Uploading image...");
+          const file = imageInput.files[0];
+          const constraints = storageManager.getUploadConstraints('adImage');
+          const validation = storageManager.validateFile(file, constraints.allowedTypes, constraints.maxSize);
+
+          if (!validation.isValid) {
+            showNotification(validation.errors.join(', '), "error");
+            hideLoading();
+            return;
+          }
+
+          const uploadResult = await storageManager.uploadAdImage(file, currentUser.id);
+          if (!uploadResult.success) {
+            throw new Error(uploadResult.error);
+          }
+
+          advertData.imageUrl = uploadResult.publicUrl;
+          hideLoading();
+        } catch (error) {
+          hideLoading();
+          showNotification("Failed to upload image: " + error.message, "error");
+          return;
+        }
+      }
+
+      // Store advert data globally
+      currentAdvertData = advertData;
 
       // Generate reference
       const reference = 'ADVERT_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      
+
       // Process payment
-      await processPaystackPayment(costInNaira, currentUser.email, reference, 'advert');
+      await processPaystackPayment(costInNaira, currentUser.email, reference, 'advert', advertData);
     };
 
     // CASHOUT HANDLER
@@ -2241,26 +2344,25 @@
     document.getElementById("requestCashoutBtn").onclick = async () => {
       const amount = parseFloat(document.getElementById("cashoutAmount").value);
       const method = document.getElementById("cashoutMethod").value;
-      
+
       if (isNaN(amount) || amount < 750) {
         showNotification("Minimum withdrawal is 750 $SA (equivalent to $1.5).", "error"); 
         return;
       }
 
       // Check if user has enough earnings balance
-      const { data: txs, error } = await supabase
+      const { data: txs, error: txsError } = await supabase
         .from('transactions')
         .select('*')
-        .eq('user_id', currentUser.id);
+        .eq('user_id', currentUser.id)
+        .in('type', ['credit', 'referral', 'daily_reward', 'ad_reward']);
 
-      if (error) throw error;
+      if (txsError) throw txsError;
 
       let earningsBalance = 0;
       if (txs) {
         txs.forEach(tx => {
-          if (tx.type === 'credit' || tx.type === 'referral' || tx.type === 'daily_reward' || tx.type === 'ad_reward') {
-            earningsBalance += parseFloat(tx.amount) || 0;
-          }
+          earningsBalance += parseFloat(tx.amount) || 0;
         });
       }
 
@@ -2277,7 +2379,7 @@
           accountNumber: document.getElementById("accountNumber").value,
           accountName: document.getElementById("accountName").value
         };
-        
+
         if (!withdrawalDetails.bankName || !withdrawalDetails.accountNumber || !withdrawalDetails.accountName) {
           showNotification("Please fill in all bank details.", "error");
           return;
@@ -2287,7 +2389,7 @@
           provider: document.getElementById("mobileProvider").value,
           number: document.getElementById("mobileNumber").value
         };
-        
+
         if (!withdrawalDetails.provider || !withdrawalDetails.number) {
           showNotification("Please fill in all mobile money details.", "error");
           return;
@@ -2319,7 +2421,7 @@
         });
 
         const result = await response.json();
-        
+
         if (result.success) {
           // Add debit transaction locally
           await supabase
@@ -2330,7 +2432,8 @@
               amount: -amount,
               date: new Date().toISOString(),
               description: `Withdrawal request (${method}) - ${currentCurrency}`,
-              status: "pending"
+              status: "pending",
+              reference: result.reference
             });
 
           showNotification(`Withdrawal request submitted successfully! You'll receive ${currentCurrency === 'NGN' ? '₦' : '$'}${withdrawalAmount.toFixed(2)} within 24-48 hours.`, "success");
@@ -2365,20 +2468,20 @@
 
         const constraints = storageManager.getUploadConstraints('proof');
         const validation = storageManager.validateFile(file, constraints.allowedTypes, constraints.maxSize);
-        
+
         if (!validation.isValid) {
           showNotification(validation.errors.join(', '), "error");
           return;
         }
 
         const uploadResult = await storageManager.uploadProofScreenshot(file, currentUser.id, pendingParticipation);
-        
+
         if (!uploadResult.success) {
           throw new Error(uploadResult.error);
         }
 
         let ad = marketAdverts.find(a => a.id === pendingParticipation);
-        
+
         // Send proof for verification to server
         const response = await fetch(`${SERVER_URL}/api/verify-proof`, {
           method: 'POST',
@@ -2395,7 +2498,7 @@
         });
 
         const verificationResult = await response.json();
-        
+
         if (!verificationResult.verified) {
           showNotification("Proof verification failed: " + verificationResult.reason, "error");
           return;
@@ -2452,7 +2555,7 @@
 
         await loadBalance();
         await renderMarket();
-        
+
         if (verificationResult.autoApprove) {
           showNotification(`Proof verified! You earned ${ad.reward_per_participant.toFixed(6)} $SA tokens.`, "success");
         } else {
@@ -2471,14 +2574,14 @@
       try {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        
+
         const { data, error } = await supabase
           .from('transactions')
           .delete()
           .lt('date', sevenDaysAgo.toISOString());
-          
+
         if (error) throw error;
-        
+
         console.log(`Cleaned up ${data?.length || 0} old transactions`);
       } catch (error) {
         console.error("Error cleaning up old transactions:", error);
@@ -3080,7 +3183,8 @@
             id: currentUser.id,
             email: currentUser.email,
             name: currentUser.user_metadata?.name || currentUser.email.split('@')[0],
-            welcome_bonus: false
+            welcome_bonus: false,
+            wallet_connected: false
           };
         } else {
           userDoc = userData;
@@ -3100,14 +3204,28 @@
         checkDailyReward();
         updateCurrencyDisplay();
 
+        // Check wallet status
+        if (userDoc && userDoc.wallet_connected) {
+          isWalletConnected = true;
+          await getWalletBalance();
+        }
+        updateWalletUI();
+
         // Clean up old transactions
         await cleanupOldTransactions();
 
-        // FIXED: Connect Paystack Wallet button
+        // Connect Paystack Wallet button
         document.getElementById("connectWalletBtn").onclick = connectPaystackWallet;
         
-        // Initialize wallet UI
-        updateWalletUI();
+        // Refresh wallet button
+        document.getElementById("refreshWalletBtn").onclick = getWalletBalance;
+
+        // Wallet tab click handler
+        document.getElementById("wallet-tab-btn").addEventListener('click', async () => {
+          if (isWalletConnected) {
+            await getWalletBalance();
+          }
+        });
 
         document.querySelector('[data-tab="inviteTab"]').onclick = async () => {
           try {
