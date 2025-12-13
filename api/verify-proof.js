@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -6,13 +6,11 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
+  // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
+  res.setHeader('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -23,7 +21,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { proofUrl, advertId, userId } = req.body;
+    const { proofUrl, proofPath, advertId, userId, posterId } = req.body;
 
     if (!proofUrl || !advertId || !userId) {
       return res.status(400).json({
@@ -32,49 +30,22 @@ export default async function handler(req, res) {
       });
     }
 
-    // Check for duplicate submission
-    const { data: existingProof } = await supabase
-      .from('participations')
-      .select('*')
-      .eq('advert_id', advertId)
-      .eq('user_id', userId)
-      .single();
+    // Basic AI verification simulation
+    // In production, you might want to use a real AI service or manual review
+    const autoApprove = Math.random() > 0.3; // 70% auto-approve rate for demo
 
-    if (existingProof) {
-      return res.status(400).json({
-        success: false,
-        message: 'Proof already submitted'
-      });
-    }
-
-    // Get advert
-    const { data: advert } = await supabase
-      .from('adverts')
-      .select('*')
-      .eq('id', advertId)
-      .single();
-
-    if (!advert || !advert.active) {
-      return res.status(400).json({
-        success: false,
-        message: 'Advert not available'
-      });
-    }
-
-    // Auto-approve
-    res.json({
-      success: true,
+    return res.status(200).json({
       verified: true,
-      autoApprove: true,
-      reason: 'Proof verified successfully',
-      rewardAmount: advert.reward_per_participant || 0
+      autoApprove: autoApprove,
+      reason: autoApprove ? 'Proof appears valid' : 'Needs manual review',
+      review_required: !autoApprove
     });
 
   } catch (error) {
-    console.error('Proof verification error:', error);
-    res.status(500).json({
+    console.error('Error verifying proof:', error);
+    return res.status(500).json({
       success: false,
-      message: 'Proof verification failed'
+      message: error.message || 'Failed to verify proof'
     });
   }
 }
