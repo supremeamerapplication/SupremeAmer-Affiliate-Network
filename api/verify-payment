@@ -1,267 +1,163 @@
-const axios = require('axios');
+const paystack = require('paystack')(process.env.PAYSTACK_SECRET_KEY);
 const { createClient } = require('@supabase/supabase-js');
 
-// Initialize Supabase
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
 
-// Paystack configuration
-const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
-const PAYSTACK_BASE_URL = 'https://api.paystack.co';
-
-// Token configuration
 const TOKEN_PRICE = parseFloat(process.env.TOKEN_PRICE) || 0.002;
-const EXCHANGE_RATE = parseFloat(process.env.EXCHANGE_RATE) || 1460;
 
-module.exports = async (req, res) => {
-    // Set CORS headers
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-    res.setHeader(
-        'Access-Control-Allow-Headers',
-        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-    );
+export default async function handler(req, res) {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    // Handle preflight requests
-    if (req.method === 'OPTIONS') {
-        res.status(200).end();
-        return;
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ success: false, message: 'Method not allowed' });
+  }
+
+  try {
+    const { reference, type, userId, email, advertData } = req.body;
+
+    if (!reference) {
+      return res.status(400).json({
+        success: false,
+        message: 'Payment reference is required'
+      });
     }
 
-    // Only accept POST requests
-    if (req.method !== 'POST') {
-        return res.status(405).json({
-            success: false,
-            message: 'Method not allowed'
-        });
+    // Verify payment with Paystack
+    const verification = await paystack.transaction.verify(reference);
+
+    if (!verification.status) {
+      return res.status(400).json({
+        success: false,
+        message: 'Payment verification failed: ' + verification.message
+      });
     }
 
-    try {
-        const { reference, type, userId, email, metadata } = req.body;
-
-        // Validate required fields
-        if (!reference || !type || !userId || !email) {
-            return res.status(400).json({
-                success: false,
-                message: 'Missing required fields: reference, type, userId, email'
-            });
-        }
-
-        console.log(`Verifying payment: ${reference}, Type: ${type}, User: ${userId}`);
-
-        // Check if transaction already exists
-        const { data: existingTx } = await supabase
-            .from('transactions')
-            .select('*')
-            .eq('payment_reference', reference)
-            .single();
-
-        if (existingTx) {
-            console.log(`Payment ${reference} already processed`);
-            return res.json({
-                success: true,
-                message: 'Payment already processed',
-                transaction: existingTx,
-                alreadyProcessed: true
-            });
-        }
-
-        // Verify payment with Paystack
-        let verification;
-        try {
-            const response = await axios.get(
-                `${PAYSTACK_BASE_URL}/transaction/verify/${reference}`,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
-                        'Content-Type': 'application/json'
-                    },
-                    timeout: 30000
-                }
-            );
-
-            verification = response.data;
-            
-            if (!verification.status) {
-                return res.status(400).json({
-                    success: false,
-                    message: verification.message || 'Verification failed'
-                });
-            }
-
-            if (verification.data.status !== 'success') {
-                return res.status(400).json({
-                    success: false,
-                    message: `Payment status: ${verification.data.status}`,
-                    data: verification.data
-                });
-            }
-
-        } catch (error) {
-            console.error('Paystack verification error:', error.response?.data || error.message);
-            return res.status(400).json({
-                success: false,
-                message: error.response?.data?.message || 'Payment verification failed',
-                error: error.message
-            });
-        }
-
-        const paymentData = verification.data;
-        const amountPaid = paymentData.amount / 100; // Convert from kobo to NGN
-
-        // Calculate tokens based on payment type
-        let tokens = 0;
-        let description = '';
-        let metadataToStore = metadata || {};
-        
-        if (type === 'topup') {
-            // 1 NGN = 0.00001 $SA
-            tokens = amountPaid * 0.00001;
-            description = `Account Top-up - ₦${amountPaid.toLocaleString()}`;
-            metadataToStore.amountPaid = amountPaid;
-            metadataToStore.currency = 'NGN';
-        } else if (type === 'advert') {
-            // Advert payment - calculate based on clicks
-            const clicks = metadata?.clicks || 500;
-            const category = metadata?.category || 'Social Media';
-            
-            // Calculate cost based on category
-            let costPerUnit;
-            switch(category) {
-                case 'Social Media':
-                    costPerUnit = 2 / 500; // $2 for 500 clicks
-                    break;
-                case 'App Download':
-                    costPerUnit = 2 / 100; // $2 for 100 downloads
-                    break;
-                case 'Website Visit':
-                    costPerUnit = 2 / 7000; // $2 for 7000 visits
-                    break;
-                default:
-                    costPerUnit = 2 / 500;
-            }
-            
-            const costInUSD = clicks * costPerUnit;
-            const costInNGN = costInUSD * EXCHANGE_RATE;
-            
-            // Verify payment amount matches calculated cost
-            if (Math.abs(amountPaid - costInNGN) > 100) { // Allow 100 NGN difference
-                console.warn(`Payment amount mismatch: Expected ~₦${costInNGN.toFixed(2)}, Received ₦${amountPaid}`);
-            }
-            
-            tokens = 0.00001; // Reward for uploading advert
-            description = `Advert Payment - ${metadata?.title || 'New Advert'}`;
-            metadataToStore.advertTitle = metadata?.title;
-            metadataToStore.category = category;
-            metadataToStore.clicks = clicks;
-            metadataToStore.calculatedCost = costInNGN;
-            metadataToStore.amountPaid = amountPaid;
-        } else {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid payment type'
-            });
-        }
-
-        // Create transaction record
-        const transactionData = {
-            user_id: userId,
-            type: type,
-            amount: tokens,
-            date: new Date().toISOString(),
-            description: description,
-            status: 'completed',
-            payment_reference: reference,
-            payment_data: paymentData,
-            currency: paymentData.currency || 'NGN',
-            amount_paid: amountPaid,
-            metadata: metadataToStore
-        };
-
-        const { data: transaction, error: transactionError } = await supabase
-            .from('transactions')
-            .insert(transactionData)
-            .select()
-            .single();
-
-        if (transactionError) {
-            console.error('Error creating transaction:', transactionError);
-            throw new Error(transactionError.message);
-        }
-
-        // Update user's top-up balance using RPC function
-        try {
-            await supabase.rpc('update_user_balance', {
-                user_id: userId,
-                amount: tokens,
-                balance_type: type === 'topup' ? 'topup' : 'earnings'
-            });
-        } catch (rpcError) {
-            console.warn('RPC function not available, using fallback:', rpcError.message);
-            // Fallback: Just log that transaction was created
-        }
-
-        // If it's an advert payment, mark advert as paid
-        if (type === 'advert' && metadata?.advertId) {
-            await supabase
-                .from('adverts')
-                .update({
-                    payment_status: 'paid',
-                    payment_reference: reference,
-                    paid_at: new Date().toISOString(),
-                    active: true
-                })
-                .eq('id', metadata.advertId);
-        }
-
-        // Send welcome bonus if this is user's first transaction
-        if (type === 'topup') {
-            const { data: userTxs } = await supabase
-                .from('transactions')
-                .select('id')
-                .eq('user_id', userId)
-                .eq('type', 'topup');
-
-            if (userTxs && userTxs.length === 1) {
-                // First top-up, add welcome bonus
-                await supabase
-                    .from('transactions')
-                    .insert({
-                        user_id: userId,
-                        type: 'credit',
-                        amount: 250, // $SA250 welcome bonus
-                        date: new Date().toISOString(),
-                        description: 'Welcome Bonus',
-                        status: 'completed'
-                    });
-                
-                // Mark user as received welcome bonus
-                await supabase
-                    .from('users')
-                    .update({ welcome_bonus: true })
-                    .eq('id', userId);
-            }
-        }
-
-        console.log(`Payment processed successfully: ${reference}, Tokens: ${tokens}, User: ${userId}`);
-
-        res.json({
-            success: true,
-            message: 'Payment verified and processed successfully',
-            tokens: tokens,
-            amountPaid: amountPaid,
-            currency: paymentData.currency || 'NGN',
-            transaction: transaction
-        });
-
-    } catch (error) {
-        console.error('Payment verification error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error processing payment',
-            error: error.message
-        });
+    if (verification.data.status !== 'success') {
+      return res.status(400).json({
+        success: false,
+        message: 'Payment was not successful'
+      });
     }
-};
+
+    const amountPaid = verification.data.amount / 100; // Convert from kobo to Naira
+    const paystackEmail = verification.data.customer.email;
+    
+    // Verify email matches
+    if (email && email !== paystackEmail) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email mismatch'
+      });
+    }
+
+    // Calculate token amount
+    const tokenAmount = amountPaid * TOKEN_PRICE;
+    
+    if (type === 'topup') {
+      // Record transaction
+      await supabase.from('transactions').insert({
+        user_id: userId,
+        type: 'topup',
+        amount: tokenAmount,
+        date: new Date().toISOString(),
+        description: `Top-up of ₦${amountPaid.toFixed(2)}`,
+        status: 'completed',
+        reference: reference
+      });
+
+      // Update user's topup balance
+      await updateUserBalance(userId, tokenAmount, 'topup');
+
+      return res.status(200).json({
+        success: true,
+        message: 'Payment verified and tokens credited',
+        amount: tokenAmount,
+        tokens: tokenAmount,
+        naira: amountPaid,
+        reference
+      });
+
+    } else if (type === 'advert') {
+      // Store advert payment for later processing
+      const { data: advertPayment, error } = await supabase
+        .from('ad_payments')
+        .insert({
+          user_id: userId,
+          amount: amountPaid,
+          token_amount: tokenAmount,
+          reference: reference,
+          advert_data: advertData,
+          status: 'verified',
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return res.status(200).json({
+        success: true,
+        message: 'Advert payment verified',
+        payment_id: advertPayment.id,
+        amount: amountPaid,
+        tokens: tokenAmount,
+        reference,
+        can_proceed: true
+      });
+
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid payment type'
+      });
+    }
+
+  } catch (error) {
+    console.error('Payment verification error:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Verification failed'
+    });
+  }
+}
+
+async function updateUserBalance(userId, amount, type = 'topup') {
+  try {
+    // Get current balance
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('balance')
+      .eq('id', userId)
+      .single();
+
+    if (error) throw error;
+
+    const currentBalance = parseFloat(user.balance) || 0;
+    const newBalance = type === 'topup' ? currentBalance + amount : currentBalance;
+
+    // Update balance
+    await supabase
+      .from('users')
+      .update({ 
+        balance: newBalance,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId);
+
+    return newBalance;
+  } catch (error) {
+    console.error('Error updating user balance:', error);
+    throw error;
+  }
+}
