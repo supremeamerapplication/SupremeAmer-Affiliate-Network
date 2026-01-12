@@ -794,111 +794,6 @@
     </div>
   </nav>
 
-  <!-- PROFILE MODAL -->
-  <div id="profileModal" class="modal-bg" aria-modal="true" role="dialog" tabindex="-1">
-    <div class="modal max-w-md">
-      <div class="modal-header">
-        <h3 class="modal-title">Your Profile</h3>
-        <button class="modal-close" aria-label="Close Profile Modal">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-
-      <div class="mb-4">
-        <div class="flex justify-between items-center mb-3">
-          <span class="font-medium">ID:</span>
-          <span id="user-id" class="truncate max-w-[200px]"></span>
-        </div>
-        <div class="flex justify-between items-center mb-3">
-          <span class="font-medium">Username:</span>
-          <span id="user-username-modal"></span>
-        </div>
-        <div class="flex justify-between items-center mb-4">
-          <span class="font-medium">Email:</span>
-          <span id="user-email-modal" class="truncate max-w-[200px]"></span>
-        </div>
-
-        <div class="mt-4">
-          <h4 class="font-semibold mb-2">Your Invitation Link</h4>
-          <div class="flex items-center gap-2">
-            <input type="text" readonly class="form-input flex-1 bg-gray-50" id="invitation-url" />
-            <button id="copyProfileInviteBtn" class="btn btn-success">
-              <i class="fas fa-copy"></i>
-            </button>
-          </div>
-
-          <div class="mt-3 flex gap-2">
-            <button id="showQrBtn" class="btn btn-primary">
-              <i class="fas fa-qrcode"></i> QR Code
-            </button>
-          </div>
-
-          <div id="inviteQrWrap" class="mt-4 hidden flex justify-center">
-            <canvas id="inviteQr" width="160" height="160"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex justify-end">
-        <button class="btn btn-primary close-modal" aria-label="Close Profile Modal">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- WELCOME CARD -->
-  <div id="welcomeCard" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50 hidden">
-    <div class="welcome-card">
-      <div class="welcome-icon">
-        <i class="fas fa-gift"></i>
-      </div>
-      <h2 class="text-xl font-bold mb-2 text-indigo-900">Welcome to SupremeAmer!</h2>
-      <p class="mb-4 text-gray-600">Congrats! You just earned a <b class="text-green-700">$SA250</b> bonus for joining.</p>
-      <button id="dismissWelcome" class="btn btn-primary" aria-label="Dismiss Welcome">
-        Let's Get Started <i class="fas fa-arrow-right ml-2"></i>
-      </button>
-    </div>
-  </div>
-
-  <!-- PENDING REWARDS NOTICE -->
-  <div id="pendingRewardsNotice" class="notification notification-info hidden">
-    <i class="fas fa-clock"></i>
-    <span>Pending reward: <b id="pendingRewardAmt">$SA0</b>. Will be credited after verification.</span>
-  </div>
-
-  <!-- SCREENSHOT MODAL -->
-  <div id="screenshotModal" class="modal-bg" aria-modal="true" role="dialog" tabindex="-1">
-    <div class="modal text-center">
-      <div class="modal-header">
-        <h3 class="modal-title">Upload Screenshot Proof</h3>
-        <button class="modal-close" aria-label="Cancel Upload">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-
-      <div class="mb-4">
-        <label class="form-label">Select Screenshot Image</label>
-        <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-          <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
-          <p class="text-sm text-gray-500 mb-2">Drag & drop or click to upload</p>
-          <input type="file" id="proofFile" accept="image/*" class="hidden" />
-          <button onclick="document.getElementById('proofFile').click()" class="btn btn-secondary btn-sm">
-            Choose File
-          </button>
-          <div id="fileName" class="text-xs text-gray-500 mt-2"></div>
-        </div>
-      </div>
-
-      <div class="flex gap-2 justify-center">
-        <button id="submitProofBtn" class="btn btn-success">
-          <i class="fas fa-check-circle mr-2"></i> Submit Proof
-        </button>
-        <button class="btn btn-secondary close-modal" aria-label="Cancel">
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- MAIN CONTENT -->
   <main class="pt-3 pb-24 max-w-3xl mx-auto px-4">
 
@@ -1219,6 +1114,111 @@
   </main>
 
   <!-- MODALS -->
+  <!-- Profile Modal -->
+  <div id="profileModal" class="modal-bg" aria-modal="true" role="dialog" tabindex="-1">
+    <div class="modal max-w-md">
+      <div class="modal-header">
+        <h3 class="modal-title">Your Profile</h3>
+        <button class="modal-close" aria-label="Close Profile Modal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="mb-4">
+        <div class="flex justify-between items-center mb-3">
+          <span class="font-medium">ID:</span>
+          <span id="user-id" class="truncate max-w-[200px]"></span>
+        </div>
+        <div class="flex justify-between items-center mb-3">
+          <span class="font-medium">Username:</span>
+          <span id="user-username-modal"></span>
+        </div>
+        <div class="flex justify-between items-center mb-4">
+          <span class="font-medium">Email:</span>
+          <span id="user-email-modal" class="truncate max-w-[200px]"></span>
+        </div>
+
+        <div class="mt-4">
+          <h4 class="font-semibold mb-2">Your Invitation Link</h4>
+          <div class="flex items-center gap-2">
+            <input type="text" readonly class="form-input flex-1 bg-gray-50" id="invitation-url" />
+            <button id="copyProfileInviteBtn" class="btn btn-success">
+              <i class="fas fa-copy"></i>
+            </button>
+          </div>
+
+          <div class="mt-3 flex gap-2">
+            <button id="showQrBtn" class="btn btn-primary">
+              <i class="fas fa-qrcode"></i> QR Code
+            </button>
+          </div>
+
+          <div id="inviteQrWrap" class="mt-4 hidden flex justify-center">
+            <canvas id="inviteQr" width="160" height="160"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end">
+        <button class="btn btn-primary close-modal" aria-label="Close Profile Modal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Welcome Card -->
+  <div id="welcomeCard" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50 hidden">
+    <div class="welcome-card">
+      <div class="welcome-icon">
+        <i class="fas fa-gift"></i>
+      </div>
+      <h2 class="text-xl font-bold mb-2 text-indigo-900">Welcome to SupremeAmer!</h2>
+      <p class="mb-4 text-gray-600">Congrats! You just earned a <b class="text-green-700">$SA250</b> bonus for joining.</p>
+      <button id="dismissWelcome" class="btn btn-primary" aria-label="Dismiss Welcome">
+        Let's Get Started <i class="fas fa-arrow-right ml-2"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Pending Rewards Notice -->
+  <div id="pendingRewardsNotice" class="notification notification-info hidden">
+    <i class="fas fa-clock"></i>
+    <span>Pending reward: <b id="pendingRewardAmt">$SA0</b>. Will be credited after verification.</span>
+  </div>
+
+  <!-- Screenshot Modal -->
+  <div id="screenshotModal" class="modal-bg" aria-modal="true" role="dialog" tabindex="-1">
+    <div class="modal text-center">
+      <div class="modal-header">
+        <h3 class="modal-title">Upload Screenshot Proof</h3>
+        <button class="modal-close" aria-label="Cancel Upload">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label">Select Screenshot Image</label>
+        <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+          <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+          <p class="text-sm text-gray-500 mb-2">Drag & drop or click to upload</p>
+          <input type="file" id="proofFile" accept="image/*" class="hidden" />
+          <button onclick="document.getElementById('proofFile').click()" class="btn btn-secondary btn-sm">
+            Choose File
+          </button>
+          <div id="fileName" class="text-xs text-gray-500 mt-2"></div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 justify-center">
+        <button id="submitProofBtn" class="btn btn-success">
+          <i class="fas fa-check-circle mr-2"></i> Submit Proof
+        </button>
+        <button class="btn btn-secondary close-modal" aria-label="Cancel">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Payment History Modal -->
   <div id="paymentHistoryModal" class="modal-bg" aria-modal="true" role="dialog" tabindex="-1">
     <div class="modal">
@@ -1365,14 +1365,6 @@
       <div id="admin-review-list" class="max-h-96 overflow-y-auto">
         <div class="text-center text-gray-500 py-4">No proofs to review.</div>
       </div>
-    </div>
-  </div>
-
-  <!-- Loading Overlay -->
-  <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-9999 hidden">
-    <div class="bg-white rounded-xl p-6 flex flex-col items-center">
-      <div class="loading mb-3" style="width: 40px; height: 40px;"></div>
-      <p id="loadingText" class="text-gray-700">Processing...</p>
     </div>
   </div>
 
@@ -1539,28 +1531,6 @@
         }
       }
 
-      // Get user storage usage
-      async getUserStorageUsage(userId) {
-        try {
-          const { data, error } = await supabase.rpc('get_user_storage_usage', {
-            user_uuid: userId
-          });
-
-          if (error) throw error;
-
-          return {
-            success: true,
-            usage: data
-          };
-        } catch (error) {
-          console.error('Storage usage fetch error:', error);
-          return {
-            success: false,
-            error: error.message
-          };
-        }
-      }
-
       // Validate file before upload
       validateFile(file, allowedTypes, maxSize) {
         const errors = [];
@@ -1615,14 +1585,15 @@
     const storageManager = new SupremeAmerStorage();
   </script>
 
+  <!-- Main Application Script -->
   <script>
-    // CONFIGURATION
+    // CONFIGURATION - Using environment variables
     const PAYSTACK_PUBLIC_KEY = 'pk_live_b12323c99b6fc1081014e9cf05c782c96ba7662e';
     const TOKEN_PRICE = 0.002;
     const EXCHANGE_RATE = 1460;
-    const SERVER_URL = 'https://supremeamer-affiliate-network.vercel.app';
+    const SERVER_URL = window.location.origin; // Uses current domain
 
-    // SUPABASE SETUP
+    // SUPABASE SETUP - Using your existing keys
     const supabaseUrl = 'https://qphbppasrkhqzmsgsnpv.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwaGJwcGFzcmtocXptc2dzbnB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0OTM2NjcsImV4cCI6MjA4MDA2OTY2N30.XJ_Hg04lRB7uXrW6gkMy6Ss7xe35zc9BhHQzcE6-sWw';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -1945,7 +1916,7 @@
           return;
         }
 
-        // Call backend to create Paystack customer
+        // Call backend to create Paystack customer - USING YOUR API
         const response = await fetch(`${SERVER_URL}/api/connect-wallet`, {
           method: 'POST',
           headers: {
@@ -1990,7 +1961,7 @@
       }
     }
 
-    // GET WALLET BALANCE FROM BACKEND
+    // GET WALLET BALANCE FROM BACKEND - USING YOUR API
     async function getWalletBalance() {
       try {
         const response = await fetch(`${SERVER_URL}/api/get-wallet-balance?userId=${currentUser.id}`);
@@ -2073,7 +2044,7 @@
       }
     }
 
-    // PAYSTACK PAYMENT FUNCTION FOR FUNDING ACCOUNT
+    // PAYSTACK PAYMENT FUNCTION FOR FUNDING ACCOUNT - USING YOUR API
     async function processPaystackPayment(amount, email, reference, type = 'topup', advertData = null) {
       try {
         showLoading("Processing payment...");
@@ -2088,7 +2059,7 @@
           callback: async function(response) {
             hideLoading();
             
-            // Verify payment on server
+            // Verify payment on server - USING YOUR API
             const verifyData = {
               reference: response.reference,
               type: type,
@@ -2131,7 +2102,7 @@
       }
     }
 
-    // VERIFY PAYMENT ON SERVER
+    // VERIFY PAYMENT ON SERVER - USING YOUR API
     async function verifyPaymentOnServer(data) {
       try {
         const response = await fetch(`${SERVER_URL}/api/verify-payment`, {
@@ -2153,7 +2124,7 @@
       }
     }
 
-    // PROCESS ADVERT AFTER PAYMENT
+    // PROCESS ADVERT AFTER PAYMENT - USING YOUR API
     async function processAdvertAfterPayment(paymentId, advertData) {
       try {
         showLoading("Creating your advert...");
@@ -2334,7 +2305,7 @@
       await processPaystackPayment(costInNaira, currentUser.email, reference, 'advert', advertData);
     };
 
-    // CASHOUT HANDLER
+    // CASHOUT HANDLER - USING YOUR API
     document.getElementById("cashoutMethod").addEventListener("change", function() {
       const method = this.value;
       document.getElementById("bankDetails").classList.toggle("hidden", method !== "bank");
@@ -2403,7 +2374,7 @@
         const withdrawalAmountFiat = amount * TOKEN_PRICE;
         const withdrawalAmount = currentCurrency === 'NGN' ? withdrawalAmountFiat * EXCHANGE_RATE : withdrawalAmountFiat;
 
-        // Send withdrawal request to server
+        // Send withdrawal request to server - USING YOUR API
         const response = await fetch(`${SERVER_URL}/api/withdraw`, {
           method: 'POST',
           headers: {
@@ -2449,7 +2420,7 @@
       }
     };
 
-    // PROOF SUBMIT HANDLER
+    // PROOF SUBMIT HANDLER - USING YOUR API
     document.getElementById("proofFile").addEventListener("change", function() {
       const fileName = this.files[0]?.name || "No file chosen";
       document.getElementById("fileName").textContent = fileName;
@@ -2482,7 +2453,7 @@
 
         let ad = marketAdverts.find(a => a.id === pendingParticipation);
 
-        // Send proof for verification to server
+        // Send proof for verification to server - USING YOUR API
         const response = await fetch(`${SERVER_URL}/api/verify-proof`, {
           method: 'POST',
           headers: {
